@@ -1,0 +1,120 @@
+<title>CCA-F Exam Blueprint</title>
+<link rel="stylesheet" href="../assets/style.css">
+
+<p class="kicker">Reference · Exam Blueprint</p>
+<h1>Claude Certified Architect – Foundations</h1>
+<p class="ask-agent">Source: <a href="./official-exam-guide.pdf">official exam guide PDF</a>, v0.1. Compressed for quick review — go back to the PDF for full "knowledge of / skills in" detail on any task statement.</p>
+
+<h2>The exam itself</h2>
+<ul>
+  <li><strong>60 questions</strong>, multiple choice (1 correct + 3 distractors), <strong>120 minutes</strong>.</li>
+  <li>Scenario-based: <strong>4 of 6</strong> scenarios drawn at random, each framing a cluster of questions.</li>
+  <li>Scored 100–1000. <strong>Passing = 720</strong>. Your target = <strong>920</strong> (92%).</li>
+  <li>No penalty for guessing — unanswered = incorrect, so never leave a question blank.</li>
+  <li>Distractors are deliberately plausible-sounding — see the pattern below.</li>
+</ul>
+
+<div class="callout accent">
+  <div class="callout-title">The recurring distractor pattern</div>
+  Across all 12 official sample questions, wrong answers cluster into the same shapes: <strong>relying on the model's probabilistic compliance</strong> (prompt wording, few-shot examples, self-reported confidence) <strong>when the situation demands a deterministic/programmatic guarantee</strong> — or the reverse, over-engineering infrastructure (custom classifiers, routing layers) when a small prompt/description fix is the proportionate first step. Learn to ask: "does this need a guarantee, or just better guidance?"
+</div>
+
+<h2>Domain weights</h2>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">1. Agentic Architecture &amp; Orchestration</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d1" style="width:27%"></span></span>
+  <span class="weight-bar-pct">27%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">3. Claude Code Configuration &amp; Workflows</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d3" style="width:20%"></span></span>
+  <span class="weight-bar-pct">20%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">4. Prompt Engineering &amp; Structured Output</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d4" style="width:20%"></span></span>
+  <span class="weight-bar-pct">20%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">2. Tool Design &amp; MCP Integration</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d2" style="width:18%"></span></span>
+  <span class="weight-bar-pct">18%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">5. Context Management &amp; Reliability</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d5" style="width:15%"></span></span>
+  <span class="weight-bar-pct">15%</span>
+</div>
+
+<h2>Domain 1 — Agentic Architecture &amp; Orchestration (27%)</h2>
+<table>
+<tr><th>Task</th><th>One-line summary</th></tr>
+<tr><td>1.1</td><td>Agentic loop: check <code>stop_reason</code> (<code>tool_use</code> vs <code>end_turn</code>), append tool results, loop. Never parse text or use iteration caps as the stopping condition.</td></tr>
+<tr><td>1.2</td><td>Hub-and-spoke: coordinator routes all inter-subagent comms; subagents don't share memory automatically.</td></tr>
+<tr><td>1.3</td><td>Task tool spawns subagents (needs <code>allowedTools: ["Task"]</code>); pass context explicitly; parallel = multiple Task calls in one turn.</td></tr>
+<tr><td>1.4</td><td>Programmatic prerequisites (hooks/gates) for deterministic ordering; prompts alone have non-zero failure rate.</td></tr>
+<tr><td>1.5</td><td>Hooks (<code>PostToolUse</code>, call interception) for guaranteed compliance — normalize data, block policy violations.</td></tr>
+<tr><td>1.6</td><td>Prompt chaining (fixed sequential) vs. dynamic decomposition (adaptive) — pick based on predictability of the task.</td></tr>
+<tr><td>1.7</td><td>Session mgmt: <code>--resume &lt;name&gt;</code> to continue; <code>fork_session</code> to branch; fresh session + summary beats resuming stale tool results.</td></tr>
+</table>
+
+<h2>Domain 2 — Tool Design &amp; MCP Integration (18%)</h2>
+<table>
+<tr><th>Task</th><th>One-line summary</th></tr>
+<tr><td>2.1</td><td>Tool descriptions are THE tool-selection mechanism. Minimal/overlapping descriptions → misrouting. Fix descriptions before adding infrastructure.</td></tr>
+<tr><td>2.2</td><td>Structured MCP errors: <code>isError</code>, <code>errorCategory</code> (transient/validation/permission/business), <code>isRetryable</code>. Generic "failed" messages block recovery.</td></tr>
+<tr><td>2.3</td><td>Fewer tools per agent (4–5, not 18) improves selection reliability. Scope tools to role. <code>tool_choice</code>: auto / any / forced.</td></tr>
+<tr><td>2.4</td><td><code>.mcp.json</code> (project, shared) vs <code>~/.claude.json</code> (personal). Env-var expansion for secrets. MCP resources expose catalogs to cut exploratory calls.</td></tr>
+<tr><td>2.5</td><td>Grep = content search, Glob = path patterns, Edit needs unique anchor text (fallback: Read+Write).</td></tr>
+</table>
+
+<h2>Domain 3 — Claude Code Configuration &amp; Workflows (20%)</h2>
+<table>
+<tr><th>Task</th><th>One-line summary</th></tr>
+<tr><td>3.1</td><td>CLAUDE.md hierarchy: user (~/.claude, not shared) → project (root/.claude, shared via VCS) → directory. <code>@import</code> for modularity.</td></tr>
+<tr><td>3.2</td><td>Commands: <code>.claude/commands/</code> (project) vs <code>~/.claude/commands/</code> (personal). Skills: <code>context: fork</code> isolates output, <code>allowed-tools</code> restricts, <code>argument-hint</code> prompts for args.</td></tr>
+<tr><td>3.3</td><td><code>.claude/rules/</code> with YAML <code>paths:</code> glob-scoping beats directory-level CLAUDE.md when conventions cut across directories (e.g. all <code>*.test.tsx</code>).</td></tr>
+<tr><td>3.4</td><td>Plan mode = architectural/multi-file/ambiguous scope. Direct execution = single-file, well-understood change.</td></tr>
+<tr><td>3.5</td><td>Concrete I/O examples, test-first iteration, "interview pattern," batch interacting issues vs. sequential independent ones.</td></tr>
+<tr><td>3.6</td><td><code>-p</code>/<code>--print</code> for non-interactive CI. <code>--output-format json</code> + <code>--json-schema</code> for machine-parseable findings. Independent review instance &gt; self-review.</td></tr>
+</table>
+
+<h2>Domain 4 — Prompt Engineering &amp; Structured Output (20%)</h2>
+<table>
+<tr><th>Task</th><th>One-line summary</th></tr>
+<tr><td>4.1</td><td>Explicit categorical criteria beat vague instructions ("be conservative") for precision/false-positive reduction.</td></tr>
+<tr><td>4.2</td><td>Few-shot examples: best tool for consistent format + generalizing judgment to ambiguous/novel cases.</td></tr>
+<tr><td>4.3</td><td><code>tool_use</code> + JSON schema eliminates syntax errors (not semantic ones). Nullable fields prevent fabrication. <code>tool_choice</code> forces a specific tool first.</td></tr>
+<tr><td>4.4</td><td>Retry-with-error-feedback works for format errors; doesn't work when info is simply absent from source.</td></tr>
+<tr><td>4.5</td><td>Message Batches API: 50% cheaper, ≤24h window, no SLA, no mid-request tool calls. Use for non-blocking workloads only; <code>custom_id</code> correlates.</td></tr>
+<tr><td>4.6</td><td>Independent review instance (no generator's reasoning context) beats self-review. Split large reviews: per-file pass + cross-file integration pass.</td></tr>
+</table>
+
+<h2>Domain 5 — Context Management &amp; Reliability (15%)</h2>
+<table>
+<tr><th>Task</th><th>One-line summary</th></tr>
+<tr><td>5.1</td><td>"Lost in the middle": keep a persistent "case facts" block; trim verbose tool output to relevant fields; put key summaries first/last.</td></tr>
+<tr><td>5.2</td><td>Escalate on: explicit customer request, policy gap/exception, inability to progress, multiple ambiguous matches. NOT on sentiment or self-reported confidence.</td></tr>
+<tr><td>5.3</td><td>Structured error context (failure type, attempted query, partial results) → coordinator recovery. Never silently suppress or hard-terminate on one failure.</td></tr>
+<tr><td>5.4</td><td>Scratchpad files + subagent delegation counteract context degradation in long exploration. <code>/compact</code> when verbose. Manifests for crash recovery.</td></tr>
+<tr><td>5.5</td><td>Aggregate accuracy hides per-segment failure. Stratified sampling + field-level confidence calibrated on labeled data, not vibes.</td></tr>
+<tr><td>5.6</td><td>Preserve claim→source mappings through synthesis. Annotate conflicts (don't arbitrarily pick one). Require dates for temporal data.</td></tr>
+</table>
+
+<h2>The 6 exam scenarios (4 of these appear)</h2>
+<ol>
+  <li><strong>Customer Support Resolution Agent</strong> — MCP tools (get_customer, lookup_order, process_refund, escalate_to_human), 80%+ first-contact resolution target. <em>Domains 1, 2, 5.</em></li>
+  <li><strong>Code Generation with Claude Code</strong> — slash commands, CLAUDE.md, plan mode vs direct execution. <em>Domains 3, 5.</em></li>
+  <li><strong>Multi-Agent Research System</strong> — coordinator + web-search/document-analysis/synthesis/report subagents. <em>Domains 1, 2, 5.</em></li>
+  <li><strong>Developer Productivity with Claude</strong> — built-in tools + MCP servers for codebase exploration. <em>Domains 2, 3, 1.</em></li>
+  <li><strong>Claude Code for CI</strong> — automated review/test-gen in CI/CD, minimizing false positives. <em>Domains 3, 4.</em></li>
+  <li><strong>Structured Data Extraction</strong> — JSON-schema validated extraction from unstructured docs. <em>Domains 4, 5.</em></li>
+</ol>
+
+<h2>Explicitly out of scope</h2>
+<p>Fine-tuning · API auth/billing/rate limits · specific programming language/framework internals · MCP server hosting/infra · Claude's internal architecture/training/RLHF · embeddings/vector DBs · computer use · vision · streaming API internals · prompt caching internals · tokenization algorithms · cloud provider (AWS/GCP/Azure) specifics.</p>
+
+<div class="nav-links">
+  <a href="../lessons/0001-the-agentic-loop.html">← Lesson 1: The Agentic Loop</a>
+  <a href="./glossary.html">Glossary →</a>
+</div>
