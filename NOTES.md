@@ -21,4 +21,4 @@ Allocation roughly follows exam weighting so time-on-task matches point-value. E
 Reference doc: [reference/study-plan.html](./reference/study-plan.html) has this as a printable checklist.
 
 ## Teaching preferences observed
-- (none stated yet beyond the above — update as sessions happen)
+- Code samples should use TypeScript, not Python, whenever showing Anthropic docs/SDK code (stated 2026-07-27). Applies to all future lessons — the Agent SDK and API docs show both languages, always pick the TS version.

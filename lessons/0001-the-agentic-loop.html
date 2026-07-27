@@ -16,19 +16,28 @@
 
 <p>Each time you execute tools, their results get appended to the conversation history as a new message, and you send the whole growing conversation back to Claude for the next turn. This is why tool results accumulate in context — a fact you'll return to in Domain 5 when context management becomes the problem.</p>
 
-<pre><code>while True:
-    response = client.messages.create(messages=conversation, tools=tools, ...)
-    conversation.append(response.to_message())
+<pre><code>while (true) {
+  const response = await client.messages.create({
+    messages: conversation,
+    tools,
+    ...
+  });
+  conversation.push(response.toMessage());
 
-    if response.stop_reason == "end_turn":
-        return response  # done — show this to the user
+  if (response.stop_reason === "end_turn") {
+    return response; // done — show this to the user
+  }
 
-    if response.stop_reason == "tool_use":
-        for block in response.content:
-            if block.type == "tool_use":
-                result = execute_tool(block.name, block.input)
-                conversation.append(tool_result_message(block.id, result))
-        # loop continues — send the updated conversation back</code></pre>
+  if (response.stop_reason === "tool_use") {
+    for (const block of response.content) {
+      if (block.type === "tool_use") {
+        const result = await executeTool(block.name, block.input);
+        conversation.push(toolResultMessage(block.id, result));
+      }
+    }
+    // loop continues — send the updated conversation back
+  }
+}</code></pre>
 
 <div class="callout accent">
   <div class="callout-title">Three anti-patterns the exam tests directly</div>
@@ -79,7 +88,7 @@
   <div class="quiz-feedback" data-correct-text="Right — the model only knows what's in the conversation history. Tool results have to be in there for Claude to reason about the next step." data-incorrect-text="The real reason is that Claude's next decision depends entirely on what's in the conversation — the tool result has to be visible to it."></div>
 </div>
 
-<p class="ask-agent">Stuck on any of this, or want to see the loop written in TypeScript instead of pseudocode? Just ask — I'm your teacher for this workspace, not just the lesson author.</p>
+<p class="ask-agent">Stuck on any of this, or want to see how this loop maps onto the Agent SDK's own TypeScript types? Just ask — I'm your teacher for this workspace, not just the lesson author.</p>
 
 <div class="nav-links">
   <a href="../reference/exam-blueprint.html">← Exam Blueprint</a>
