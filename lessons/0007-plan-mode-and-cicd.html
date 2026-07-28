@@ -1,0 +1,80 @@
+<title>Lesson 7: Plan Mode, Iterative Refinement &amp; CI/CD</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 7 · Domain 3 — Claude Code Configuration &amp; Workflows (20% of exam)</p>
+<h1>Plan Mode, Iterative Refinement &amp; CI/CD</h1>
+<p>Three task statements, one closing lesson for Domain 3: when to plan before acting, how to steer Claude Code toward a working result faster, and how to run it unattended in a pipeline.</p>
+
+<h2>Plan mode vs. direct execution</h2>
+<p>The official guide's own sample question sets the bar clearly: restructuring a monolith into microservices — dozens of files touched, multiple valid service boundaries, real architectural tradeoffs to weigh. The correct move is <strong>plan mode</strong>: explore the codebase, understand dependencies, and design an approach before any code changes. Starting direct execution and "letting structure emerge incrementally" risks exactly the costly rework plan mode exists to prevent.</p>
+<p>Direct execution is for the opposite shape of task: a single-file bug fix with a clear stack trace, a validation check added to one function — well-scoped, well-understood, low ambiguity.</p>
+<p>For verbose discovery phases inside a plan — reading dozens of files to build understanding — delegate to the <strong>Explore</strong> subagent. It does the wide reading and returns a summary, keeping the noisy exploration out of your main context window.</p>
+
+<h2>Iterative refinement, three techniques</h2>
+<ul>
+  <li><strong>Concrete input/output examples</strong> beat prose the moment prose gets interpreted inconsistently. Two or three examples of exactly what a transformation should produce settle ambiguity a paragraph of description can't.</li>
+  <li><strong>Test-driven iteration</strong> — write the test suite first (expected behavior, edge cases, performance requirements), then iterate by sharing test failures rather than re-describing the goal from scratch.</li>
+  <li><strong>The interview pattern</strong> — in an unfamiliar domain, have Claude ask clarifying questions before implementing, surfacing considerations (cache invalidation strategy, failure modes) you may not have anticipated yourself.</li>
+</ul>
+<p>One more judgment call: when several issues genuinely interact (a fix to one touches the same code as another), put them in a single detailed message. When they're independent, fix them sequentially instead — bundling unrelated changes just adds noise to each iteration.</p>
+
+<h2>Claude Code in CI/CD</h2>
+<pre><code># -p (--print) runs Claude Code non-interactively — required for any
+# automated pipeline, since interactive prompts would just hang.
+claude -p "Review this PR diff for bugs and security issues" \
+  --output-format json \
+  --json-schema ./review-schema.json \
+  &lt; pr-diff.patch &gt; review-findings.json</code></pre>
+<p><code>--output-format json</code> combined with <code>--json-schema</code> produces machine-parseable findings you can post as inline PR comments programmatically — free text won't do that reliably. CLAUDE.md still does its usual job here too: it's how you hand CI-invoked Claude Code your testing standards, fixture conventions, and review criteria without re-stating them in every invocation.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Why review with a fresh instance, not the generating session</div>
+  A session that just generated code carries its own reasoning forward — it's biased toward believing its own decisions were sound, and less likely to question them in the same breath. An independent review instance, with no memory of that reasoning, catches more. This is the CI-specific edge of a pattern you'll see again, more formally, in Domain 4's multi-instance review.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://code.claude.com/docs" target="_blank" rel="noopener">Extend Claude Code</a> docs and the <a href="https://www.anthropic.com/engineering" target="_blank" rel="noopener">Steering Claude Code</a> blog post cover plan mode, non-interactive flags, and iteration technique directly — this lesson compresses Task Statements 3.4, 3.5, and 3.6.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You're restructuring a monolith into microservices — dozens of files, multiple valid service boundaries, real architectural tradeoffs. What's the right approach?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Enter plan mode to explore and design before changing anything</button>
+    <button class="quiz-option">Start direct execution and let structure emerge incrementally</button>
+    <button class="quiz-option">Use direct execution with exhaustive upfront written instructions</button>
+    <button class="quiz-option">Begin in direct execution, switch modes only if surprised</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — this is precisely what plan mode is for: complex, multi-file, architecturally ambiguous work where exploring before committing prevents costly rework." data-incorrect-text="The complexity here is already known upfront, not something that might emerge later — that's the signal for plan mode before any changes are made."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Which CLI flag combination gets you machine-parseable findings suitable for posting automated PR comments?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">-p with --output-format json and --json-schema</button>
+    <button class="quiz-option">--resume with a named CI session identifier</button>
+    <button class="quiz-option">--fork-session run once per pull request event</button>
+    <button class="quiz-option">--plan-mode combined with an --autonomous flag</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — -p enables non-interactive CI execution, and --output-format json with --json-schema is what makes the output structured enough to parse programmatically." data-incorrect-text="Session resumption and forking address continuity, not output structure — and --autonomous isn't a real Claude Code flag. The json output/schema combination is what CI tooling needs."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Why is an independent Claude Code instance generally more reliable reviewing code than the same session that just generated it?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">The generating session retains reasoning context that biases review</button>
+    <button class="quiz-option">Independent instances always run with a larger context window</button>
+    <button class="quiz-option">The same session cannot access --output-format json at all</button>
+    <button class="quiz-option">Self-review requires manually disabling plan mode beforehand</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — the generating session's own reasoning is still sitting in its context, making it less likely to question the decisions it just made." data-incorrect-text="Context window size and flag availability aren't the mechanism here — it's that the generating session already 'agrees' with its own prior reasoning, which a fresh instance never carries."></div>
+</div>
+
+<p class="ask-agent">Want to work through when you'd choose plan mode for something in your own codebase? Describe the task and I'll help you reason through it.</p>
+
+<div class="nav-links">
+  <a href="./0006-commands-vs-skills.html">← Lesson 6: Commands vs. Skills</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0008-tool-descriptions-and-mcp-errors.html">Lesson 8: Tool Descriptions →</a>
+</div>

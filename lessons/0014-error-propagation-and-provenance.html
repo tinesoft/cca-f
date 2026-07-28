@@ -1,0 +1,94 @@
+<title>Lesson 14: Error Propagation, Scratchpads &amp; Provenance</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 14 · Domain 5 — Context Management &amp; Reliability (15% of exam)</p>
+<h1>Error Propagation, Scratchpads &amp; Provenance</h1>
+<p>The last lesson in the core curriculum. Four task statements, all variations on one idea: when something fails or gets uncertain deep inside a multi-agent or long-running system, the information needed to recover has to survive the trip back up — nothing here forgives silence.</p>
+
+<h2>Structured error propagation</h2>
+<p>The official guide's sample question: a web-search subagent times out mid-research. What should it hand back to the coordinator?</p>
+
+<pre><code>interface SubagentError {
+  failureType: "timeout" | "not_found" | "rate_limited";
+  attemptedQuery: string;
+  partialResults: unknown[] | null;
+  alternativesToTry: string[];
+}
+
+// Bad — hides everything the coordinator could have acted on
+function badFailure(): { status: "search unavailable" } {
+  return { status: "search unavailable" };
+}
+
+// Good — the coordinator can retry smarter, fall back, or proceed with partial data
+function reportFailure(q: string): SubagentError {
+  return {
+    failureType: "timeout",
+    attemptedQuery: q,
+    partialResults: null,
+    alternativesToTry: [`${q} site:reuters.com`, `${q} 2025`],
+  };
+}</code></pre>
+
+<p>Three anti-patterns to name on sight: a generic status string that hides useful context; <strong>silently suppressing</strong> the error by returning an empty result marked as success (which looks identical to "the query legitimately found nothing"); and terminating the entire workflow on one subagent's failure, when a partial-results recovery might have been entirely viable. Subagents should handle transient failures locally when they can, and only propagate upward what they genuinely couldn't resolve — along with what was attempted and whatever partial results exist.</p>
+
+<h2>Scratchpads and manifests for long-running work</h2>
+<p>Extended exploration sessions degrade: the model starts giving vaguer answers, referencing "typical patterns" instead of the specific classes it actually found earlier. Two counters: delegate verbose exploration to subagents so the main agent coordinates at a high level instead of drowning in raw output, and maintain <strong>scratchpad files</strong> recording key findings that later steps can reference directly instead of relying on what's still in context. For crash recovery specifically, have each agent export its state to a known location, and have the coordinator load a manifest of that state on resume. <code>/compact</code> is the manual release valve when context is filling with exploration output faster than it's being distilled.</p>
+
+<h2>Stratified sampling beats aggregate accuracy</h2>
+<p>"97% accuracy" can hide a document type or field that's actually failing badly, buried inside an average dominated by the easy cases. Stratified random sampling — checking across document types and fields deliberately, not just overall — is what surfaces that. Pair it with field-level confidence scores calibrated against labeled validation data (not self-reported, not vibes), and route low-confidence or contradictory-source extractions to human review before trusting the aggregate number to mean what it looks like it means.</p>
+
+<h2>Provenance: don't let synthesis erase where a claim came from</h2>
+<p>When multiple sources get combined into one report, source attribution is the first casualty of careless summarization. The fix is requiring subagents to output structured claim→source mappings, and requiring the synthesis step to preserve — not flatten — them. When two credible sources genuinely disagree, <strong>annotate the conflict with both sources</strong> rather than silently picking one. And always carry publication or collection dates through: without them, a real change over time gets misread as a contradiction between sources that were simply talking about different points in time.</p>
+
+<div class="callout accent">
+  <div class="callout-title">The thread connecting all of Domain 5</div>
+  Every task statement here is a version of the same instruction: <strong>don't let information die in transit.</strong> Whether it's a case fact lost to summarization, an error reduced to "failed," a finding buried mid-context, or a source attribution dropped during synthesis — the fix pattern is always to carry the specific, structured detail forward explicitly rather than trusting it to survive compression on its own.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://docs.claude.com/en/api/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK overview</a> covers scratchpad and session-recovery patterns — this lesson closes Domain 5 and the core curriculum, compressing Task Statements 5.3 through 5.6.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A web-search subagent times out mid-research. Which failure-reporting approach gives the coordinator the best shot at recovering?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Structured context: failure type, query tried, partial results</button>
+    <button class="quiz-option">A generic "search unavailable" status after retries exhaust</button>
+    <button class="quiz-option">An empty result set silently marked as successful</button>
+    <button class="quiz-option">Propagating the raw exception up to terminate the run</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — structured context gives the coordinator enough to decide between retrying, trying an alternative, or proceeding with partial data." data-incorrect-text="A generic status hides useful detail, a silently-successful empty result is indistinguishable from a real empty result, and terminating the whole run is disproportionate. Structured context is what enables real recovery."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. An extraction pipeline reports 97% aggregate accuracy. Why isn't that enough to trust it fully?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Aggregate numbers can hide poor accuracy on specific segments</button>
+    <button class="quiz-option">97% is always below the passing threshold for production</button>
+    <button class="quiz-option">Aggregate accuracy cannot be computed without labeled data</button>
+    <button class="quiz-option">It means exactly 3% of all fields are left null</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — one badly-performing document type or field can be masked entirely by an average dominated by easier cases. Stratified sampling is what catches it." data-incorrect-text="97% isn't inherently a fail, and it doesn't map to a specific null-field percentage. The real risk is that the aggregate can hide a specific segment performing far worse than the headline number suggests."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Two credible sources report different figures for the same statistic, collected at different times. What's the correct synthesis behavior?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Preserve both with source and date, annotate the conflict</button>
+    <button class="quiz-option">Silently keep whichever source has the more recent URL</button>
+    <button class="quiz-option">Average the two numbers into a single blended figure</button>
+    <button class="quiz-option">Discard both since a synthesis agent can't decide alone</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — preserving both figures with dates and sources lets a reader judge for themselves whether it's a real conflict or just a change over time." data-incorrect-text="Picking one silently, averaging, or discarding all lose real information — and might turn a legitimate change-over-time into a fabricated contradiction, or vice versa. Annotate and preserve instead."></div>
+</div>
+
+<p class="ask-agent">That's every task statement in the official exam guide covered. Ready for a mixed-domain review, or want to talk through the mock-exam plan in Week 4? Just ask.</p>
+
+<div class="nav-links">
+  <a href="./0013-context-preservation-and-escalation.html">← Lesson 13: Context &amp; Escalation</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>

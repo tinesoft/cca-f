@@ -1,0 +1,234 @@
+<title>CCA-F Scenario Drills</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Reference · Week 4 · Scenario Drills</p>
+<h1>Mixed-Domain Scenario Drills</h1>
+<p class="ask-agent">Every question below is <strong>written for this workspace</strong>, grounded in the task statements and worked examples from the <a href="./official-exam-guide.pdf">official exam guide PDF</a> — none of it reproduces the guide's own 12 sample questions verbatim (those are already woven into Lessons 1–14). Treat this as mixed-domain retrieval practice, not a leaked copy of the real exam. The guide mentions an official practice exam with a separately-provided link — see the note in RESOURCES.md; if you locate it, run that too before sitting the real thing.</p>
+
+<div class="callout">
+  <div class="callout-title">How to run this drill</div>
+  The real exam gives you 120 minutes for 60 questions across 4 of these 6 scenarios — roughly 2 minutes a question. Pick 4 of the 6 sections below at random, set a 24-minute timer (18 questions × ~1.3 min, scaled down since this is a fraction of the real thing), and go through without pausing to check answers until you're done with all four sections.
+</div>
+
+<h2>Scenario 1: Customer Support Resolution Agent</h2>
+<p><em>Primary domains: Agentic Architecture &amp; Orchestration, Tool Design &amp; MCP Integration, Context Management &amp; Reliability.</em> MCP tools: <code>get_customer</code>, <code>lookup_order</code>, <code>process_refund</code>, <code>escalate_to_human</code>. Target: 80%+ first-contact resolution.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A customer explicitly says "I want to speak to a person" about a routine, easily resolvable billing question. What should the agent do?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Escalate immediately, honoring the explicit request</button>
+    <button class="quiz-option">Attempt to resolve it first since it looks simple</button>
+    <button class="quiz-option">Ask the customer to confirm they want to escalate</button>
+    <button class="quiz-option">Keep troubleshooting until the customer disengages</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — an explicit request for a human is one of the escalation triggers that overrides autonomous resolution, regardless of how simple the underlying issue looks." data-incorrect-text="Case complexity isn't the trigger here — the customer explicitly asked for a human. That request should be honored directly, not second-guessed or delayed."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. process_refund returns { isError: true, errorCategory: "transient", isRetryable: true }. What should the agent do?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Retry the call, since the category marks it safe to retry</button>
+    <button class="quiz-option">Immediately escalate without attempting any recovery</button>
+    <button class="quiz-option">Tell the customer the refund permanently failed</button>
+    <button class="quiz-option">Treat it identically to a business-rule violation</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — that's exactly what the structured metadata is for: isRetryable: true tells the agent this specific failure is worth retrying, unlike a business error." data-incorrect-text="The whole point of errorCategory and isRetryable is to let the agent act correctly without guessing — here they say directly that a retry is the right move."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Your team decides refunds under $50 never require identity verification, but refunds over $50 always must. What's the correct way to implement this?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A programmatic check gating verification by refund amount</button>
+    <button class="quiz-option">A system prompt describing the $50 threshold to the agent</button>
+    <button class="quiz-option">Two separate agents, one for each refund size</button>
+    <button class="quiz-option">A confidence score threshold based on refund size</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a real dollar threshold with compliance implications needs a deterministic gate, not a rule the model applies probabilistically." data-incorrect-text="A prompt-based threshold is still probabilistic compliance. A financial rule like this needs a programmatic check that can't be skipped."></div>
+</div>
+
+<h2>Scenario 2: Code Generation with Claude Code</h2>
+<p><em>Primary domains: Claude Code Configuration &amp; Workflows, Context Management &amp; Reliability.</em> Custom slash commands, CLAUDE.md configuration, plan mode vs. direct execution.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You're fixing a single failing test with a clear stack trace pointing to one function. Should you use plan mode?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">No — direct execution fits a well-scoped, single-file change</button>
+    <button class="quiz-option">Yes — any bug fix benefits from planning first</button>
+    <button class="quiz-option">Yes — plan mode is required whenever tests fail</button>
+    <button class="quiz-option">No — plan mode cannot be used for bug fixes</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a clear, single-file, well-understood fix is exactly what direct execution is for. Plan mode's overhead isn't earning its cost here." data-incorrect-text="Plan mode is for architectural ambiguity and multi-file scope — a single clear stack trace pointing at one function doesn't have either."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Hours into a resumed refactoring session, the agent starts giving generic answers about "typical patterns" instead of the specifics it found earlier. What's the most direct fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Run /compact, or delegate exploration to a subagent</button>
+    <button class="quiz-option">Increase the iteration cap so the agent tries harder</button>
+    <button class="quiz-option">Switch tool_choice to "any" to force more tool calls</button>
+    <button class="quiz-option">Restart the loop with a fresh, empty system prompt</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — this is context degradation from an overloaded window. Compacting or offloading exploration to a subagent is the direct countermeasure." data-incorrect-text="Iteration caps and tool_choice don't address context degradation, and wiping the system prompt would lose real project context along with the noise. Compact or delegate instead."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. You ask Claude Code to "clean up this module" and get inconsistent results on each attempt. What's the most effective next step?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Provide 2-3 concrete before/after examples of the change</button>
+    <button class="quiz-option">Repeat the same instruction with stronger emphasis</button>
+    <button class="quiz-option">Switch immediately to a different, larger model</button>
+    <button class="quiz-option">Abandon the task since cleanup is inherently ambiguous</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — concrete input/output examples resolve exactly the kind of interpretation inconsistency vague prose produces." data-incorrect-text="Repeating the same vague instruction more forcefully doesn't add information. Concrete before/after examples are what settle ambiguous, inconsistently-interpreted instructions."></div>
+</div>
+
+<h2>Scenario 3: Multi-Agent Research System</h2>
+<p><em>Primary domains: Agentic Architecture &amp; Orchestration, Tool Design &amp; MCP Integration, Context Management &amp; Reliability.</em> Coordinator delegating to web-search, document-analysis, synthesis, and report subagents.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A coordinator spawns its synthesis subagent before both the web-search and document-analysis subagents have returned. What's wrong with this?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Synthesis lacks context it needs and may be incomplete</button>
+    <button class="quiz-option">Nothing — subagents should always run fully concurrently</button>
+    <button class="quiz-option">The Task tool blocks this from happening automatically</button>
+    <button class="quiz-option">Synthesis agents cannot accept any subagent output at all</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — synthesis depends on the findings the other subagents produce. Spawning it before they've returned starves it of the context it needs to do its job." data-incorrect-text="The Task tool doesn't enforce ordering for you, and synthesis genuinely does depend on prior findings — spawning it too early is a real coordinator design mistake."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A document-analysis subagent is given all 12 of the system's tools, including web search and unrelated refund tools. What's the likely consequence?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Reduced tool-selection reliability and occasional misuse</button>
+    <button class="quiz-option">Faster completion, since more tools means more options</button>
+    <button class="quiz-option">No effect — unused tools are simply ignored</button>
+    <button class="quiz-option">The Task tool rejects the oversized tool list automatically</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — tools outside an agent's specialization increase decision complexity and get misused, not ignored." data-incorrect-text="Extra tools aren't free — they add decision complexity at every turn, and agents given tools outside their role do tend to reach for them incorrectly."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. A document-analysis subagent finds two paragraphs in the same report stating contradictory figures for the same metric. What should it do?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Include both values in its output, flagged as conflicting</button>
+    <button class="quiz-option">Report only the figure that appears first in the document</button>
+    <button class="quiz-option">Average the two figures into a single blended value</button>
+    <button class="quiz-option">Omit the metric entirely since the source is unreliable</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — preserving and flagging both lets the coordinator or a human decide how to reconcile them, rather than the subagent silently guessing." data-incorrect-text="Picking one arbitrarily, averaging, or dropping the metric all destroy real information. Flag the conflict and let it be resolved downstream instead."></div>
+</div>
+
+<h2>Scenario 4: Developer Productivity with Claude</h2>
+<p><em>Primary domains: Tool Design &amp; MCP Integration, Claude Code Configuration &amp; Workflows, Agentic Architecture &amp; Orchestration.</em> Built-in tools plus MCP servers for codebase exploration.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You need to find every place in a codebase that calls a specific function by name. Which built-in tool fits best?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Grep, searching file contents for the function name</button>
+    <button class="quiz-option">Glob, matching file paths against a naming pattern</button>
+    <button class="quiz-option">Edit, since it can search and replace in one step</button>
+    <button class="quiz-option">Write, to regenerate files with instrumentation added</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — this is a content search, which is exactly Grep's job. Glob matches paths, not file contents." data-incorrect-text="You're searching inside file contents for a name, not matching file paths or modifying anything yet — that's Grep's use case specifically."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A productivity agent needs to explore a large, unfamiliar codebase before changing anything, and full exploration risks filling the context window. What's the best approach?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Delegate exploration to the Explore subagent for a summary</button>
+    <button class="quiz-option">Read every file in the repository directly, one by one</button>
+    <button class="quiz-option">Skip exploration and start editing based on file names</button>
+    <button class="quiz-option">Increase max_tokens until the whole repo fits in context</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — the Explore subagent absorbs the verbose discovery work and returns a distilled summary, keeping the main context usable." data-incorrect-text="Reading everything directly is exactly what fills the window, editing blind is risky, and max_tokens doesn't solve an exploration-volume problem. Delegating to Explore does."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. This agent has both built-in tools and several MCP server tools connected. Should you expect all of them to be available to the model at once?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Yes — all tools from connected servers are discovered at once</button>
+    <button class="quiz-option">No — only one tool source can be active per session</button>
+    <button class="quiz-option">No — MCP tools need a separate agentic loop entirely</button>
+    <button class="quiz-option">Yes, but only after built-in tools are manually disabled</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — tools from every connected MCP server are discovered at connection time and made available simultaneously alongside built-in tools." data-incorrect-text="There's no such exclusivity or separate-loop requirement — every connected server's tools become available together, which is exactly why scoping which tools an agent gets matters."></div>
+</div>
+
+<h2>Scenario 5: Claude Code for Continuous Integration</h2>
+<p><em>Primary domains: Claude Code Configuration &amp; Workflows, Prompt Engineering &amp; Structured Output.</em> Automated review and test generation in CI/CD, minimizing false positives.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. Your CI script runs Claude Code with a review prompt, but the job hangs waiting for input. Which flag fixes this?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">-p (--print), for non-interactive mode</button>
+    <button class="quiz-option">An environment variable that sets headless mode</button>
+    <button class="quiz-option">Redirecting stdin from /dev/null instead</button>
+    <button class="quiz-option">A --batch flag that skips confirmation prompts</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — -p is the documented, correct way to run Claude Code non-interactively in a pipeline." data-incorrect-text="Neither a headless environment variable nor a --batch flag exist for this purpose, and redirecting stdin is an indirect workaround. -p is the documented mechanism."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Your team wants to cut API costs on two workflows: a blocking pre-merge check, and an overnight technical-debt report. Which change is appropriate?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Batch only the overnight report; keep pre-merge synchronous</button>
+    <button class="quiz-option">Batch both workflows and poll for pre-merge completion</button>
+    <button class="quiz-option">Keep both synchronous to avoid batch ordering issues</button>
+    <button class="quiz-option">Batch both, falling back to synchronous if a batch is slow</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — the report is non-blocking and latency-tolerant, a perfect batch candidate. The pre-merge check blocks developers and needs a latency guarantee batching doesn't offer." data-incorrect-text="A blocking pre-merge check can't tolerate the Batch API's lack of an SLA — match each workflow's latency requirement to the right API instead of applying one choice to both."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. An automated review over an 18-file pull request produces contradictory feedback — flagging a pattern as an issue in one file while approving the identical pattern elsewhere in the same PR. What's the most effective restructuring?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A per-file pass plus a separate cross-file integration pass</button>
+    <button class="quiz-option">Ask developers to submit smaller pull requests instead</button>
+    <button class="quiz-option">Switch to a model with a larger context window</button>
+    <button class="quiz-option">Run three passes and keep issues found in at least two</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — this is attention dilution from reviewing too much at once. Splitting into focused per-file passes plus one integration pass fixes it directly." data-incorrect-text="Shifting the burden to developers, using a bigger context window, or requiring multi-pass consensus don't address the root cause — attention dilution from an unfocused single pass over many files."></div>
+</div>
+
+<h2>Scenario 6: Structured Data Extraction</h2>
+<p><em>Primary domains: Prompt Engineering &amp; Structured Output, Context Management &amp; Reliability.</em> Extracting from unstructured documents, JSON-schema validated, integrating with downstream systems.</p>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You're extracting invoice data, and roughly 15% of source PDFs simply don't list a purchase-order number. What schema design avoids fabricated PO numbers?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Make the purchase-order-number field nullable, not required</button>
+    <button class="quiz-option">Require the field, and retry extraction until one appears</button>
+    <button class="quiz-option">Reject any PDF missing a purchase-order number outright</button>
+    <button class="quiz-option">Default the field to "N/A" as a hardcoded string always</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a nullable field lets the model report absence honestly instead of inventing a value to satisfy a required field." data-incorrect-text="Retrying won't produce a PO number that isn't in the source, rejecting the document discards otherwise-good data, and a hardcoded default hides a real absence. Nullable is the honest option."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Your extraction pipeline reports 98% field-level accuracy overall, but you suspect handwritten invoices perform worse than typed ones. How do you verify this?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Stratified sampling comparing accuracy by document type</button>
+    <button class="quiz-option">Trust the 98% aggregate figure as sufficiently precise</button>
+    <button class="quiz-option">Re-run the same validation set a second time to confirm</button>
+    <button class="quiz-option">Lower the required confidence threshold until it improves</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — stratified sampling by document type is exactly what surfaces a segment-specific weakness an aggregate number would hide." data-incorrect-text="The aggregate figure is precisely what could be masking the problem, and re-running the same set or adjusting thresholds doesn't test the specific segment you suspect is weak. Sample by document type instead."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. You have three different extraction tools for three document types, and don't know in advance which type a given document is. You need to guarantee some extraction tool is called, but let the model pick which. Which tool_choice value fits?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">"any" — forces a tool call while letting the model choose</button>
+    <button class="quiz-option">"auto" — allows the model to skip calling a tool entirely</button>
+    <button class="quiz-option">A forced, named tool_choice for one specific tool</button>
+    <button class="quiz-option">Omitting tool_choice, since defaults guarantee a call</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — 'any' guarantees a tool call happens without pinning which one, exactly matching 'guaranteed call, model picks the type.'" data-incorrect-text="'auto' doesn't guarantee a call at all, a forced named choice removes the model's ability to pick the right document type, and the default behavior is 'auto,' not a guaranteed call."></div>
+</div>
+
+<div class="nav-links">
+  <a href="./preparation-exercises.html">← Preparation Exercises</a>
+  <a href="./study-plan.html">Study Plan</a>
+  <a href="./exam-blueprint.html">Exam Blueprint →</a>
+</div>

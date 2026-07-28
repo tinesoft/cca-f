@@ -1,0 +1,89 @@
+<title>Lesson 9: Scoping Tools Across Agents &amp; Servers</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 9 · Domain 2 — Tool Design &amp; MCP Integration (18% of exam)</p>
+<h1>Scoping Tools Across Agents &amp; Servers</h1>
+<p>Last Domain 2 lesson. Three task statements, one theme: an agent — or a whole team — with unrestricted access to everything makes worse decisions than one with a small, well-scoped set of options.</p>
+
+<h2>Fewer tools per agent, not more</h2>
+<p>Giving an agent 18 tools instead of 4–5 doesn't make it more capable — it degrades tool selection reliability by increasing decision complexity at every turn. Worse: agents given tools outside their actual specialization tend to misuse them. A synthesis subagent with web-search access will occasionally go searching instead of synthesizing, even though a dedicated search subagent already exists for exactly that. The fix is scoping: restrict each subagent's tools to what its role actually needs, with narrow, deliberate exceptions for genuinely high-frequency cross-role needs (a scoped <code>verify_fact</code> tool for a synthesis agent, say) rather than open access.</p>
+
+<h2>tool_choice: three levels of control</h2>
+<pre><code>// "auto" (the default) — the model may call a tool, or just respond in text
+const auto = await client.messages.create({
+  model: "claude-sonnet-5", messages, tools, tool_choice: { type: "auto" },
+});
+
+// "any" — the model MUST call some tool, but picks which one
+const forcedAny = await client.messages.create({
+  model: "claude-sonnet-5", messages, tools, tool_choice: { type: "any" },
+});
+
+// forced — a specific named tool runs first, guaranteed
+const forcedNamed = await client.messages.create({
+  model: "claude-sonnet-5", messages, tools,
+  tool_choice: { type: "tool", name: "extract_metadata" },
+});</code></pre>
+<p>Forced selection is how you guarantee ordering — e.g. an extraction tool must run before any enrichment tool touches its output, in every case, with no dependence on the model choosing to call it first.</p>
+
+<h2>MCP server scoping: shared vs. personal, same pattern again</h2>
+<ul>
+  <li><strong><code>.mcp.json</code></strong> — project-scoped, checked into version control, shared team tooling. Supports environment-variable expansion (<code>${GITHUB_TOKEN}</code>) so credentials never get committed alongside the config.</li>
+  <li><strong><code>~/.claude.json</code></strong> — user-scoped, personal or experimental servers.</li>
+</ul>
+<p>Every tool from every connected server becomes available to the agent simultaneously at connection time — which is exactly why the "fewer tools, scoped by role" principle above matters at the server level too, not just within a single agent's own tool list. And prefer an existing community MCP server for standard integrations (Jira, GitHub) over building one from scratch — reserve custom servers for genuinely team-specific workflows. <strong>MCP resources</strong> — exposing a catalog (issue summaries, a documentation hierarchy, a database schema) directly — cut down on exploratory tool calls the agent would otherwise need just to figure out what's available.</p>
+
+<h2>Built-in tools: match the tool to the search shape</h2>
+<ul>
+  <li><strong>Grep</strong> — content search: function names, error messages, import statements.</li>
+  <li><strong>Glob</strong> — path pattern matching: finding files by name or extension pattern.</li>
+  <li><strong>Read/Write</strong> — full file operations.</li>
+  <li><strong>Edit</strong> — targeted modification via unique anchor text; when the anchor isn't unique, fall back to Read + Write rather than fighting Edit.</li>
+</ul>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> the <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a> docs cover server scoping and resources; Anthropic's <a href="https://platform.claude.com/docs" target="_blank" rel="noopener">Claude API docs</a> cover <code>tool_choice</code> — this lesson closes Domain 2, compressing Task Statements 2.3, 2.4, and 2.5.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A synthesis subagent occasionally runs its own web searches, even though a separate search subagent exists for that purpose. What's the most direct fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Scope the synthesis agent's tools to exclude web search</button>
+    <button class="quiz-option">Add a system prompt asking it to avoid searching directly</button>
+    <button class="quiz-option">Give it 18 tools so search is one option among many</button>
+    <button class="quiz-option">Increase its iteration cap so searches happen less often</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — removing the tool removes the possibility entirely, which is more reliable than asking the model not to use a capability it still has." data-incorrect-text="A prompt request is probabilistic, more tools makes selection worse, and iteration caps don't govern which tools get chosen. Scoping access is the deterministic fix."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. You need to guarantee a specific tool runs before any others, in a fixed order. Which tool_choice value does this?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A forced choice naming that exact tool</button>
+    <button class="quiz-option">tool_choice set to "auto" for maximum flexibility</button>
+    <button class="quiz-option">tool_choice set to "any" without naming a tool</button>
+    <button class="quiz-option">Omitting tool_choice so Claude infers the ordering itself</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — only a forced, named tool_choice guarantees that exact tool is what runs, with no room for the model to pick something else first." data-incorrect-text="'auto' and 'any' both leave the choice (or whether to call at all) with the model. Only naming the specific tool forces the exact ordering you need."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Where should a shared MCP server used by the whole team be configured?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">In project-scoped .mcp.json, committed to version control</button>
+    <button class="quiz-option">In each developer's personal ~/.claude.json only</button>
+    <button class="quiz-option">Hardcoded directly into the system prompt every session</button>
+    <button class="quiz-option">Inside a CLAUDE.md file under a "servers" heading</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — .mcp.json is the shared, version-controlled configuration point, with environment-variable expansion so secrets never get committed." data-incorrect-text="Personal config files don't reach the team, and neither the system prompt nor CLAUDE.md is where MCP server connections are declared — that's .mcp.json's job."></div>
+</div>
+
+<p class="ask-agent">That's Domain 2 wrapped up alongside Domain 3. Ready to move into Domain 4, prompt engineering and structured output? Just say the word.</p>
+
+<div class="nav-links">
+  <a href="./0008-tool-descriptions-and-mcp-errors.html">← Lesson 8: Tool Descriptions</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0010-explicit-criteria-and-few-shot.html">Lesson 10: Explicit Criteria &amp; Few-Shot →</a>
+</div>

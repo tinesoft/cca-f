@@ -1,0 +1,96 @@
+<title>Lesson 2: Coordinator/Subagent Orchestration</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 2 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
+<h1>Coordinator/Subagent Orchestration</h1>
+<p>Lesson 1 gave you the loop a single agent runs. Multi-agent systems are just that loop, run by several agents at once — but only if you get the wiring between them right. The exam tests this wiring, not the loop itself, at this level.</p>
+
+<h2>Hub-and-spoke, not mesh</h2>
+<p>A coordinator agent owns every inter-subagent communication: it decomposes the task, delegates to subagents, and aggregates their results. Subagents never talk to each other directly — everything routes through the hub. This isn't a style preference; it's what gives you observability, consistent error handling, and a single place to control information flow.</p>
+
+<p>The part that catches people out: <strong>subagents don't automatically inherit the coordinator's conversation history.</strong> Each one starts with isolated context. Whatever it needs — prior findings, source data, constraints — has to be handed to it explicitly, in the prompt, when it's spawned.</p>
+
+<h2>Spawning subagents with the Task tool</h2>
+<p>The <code>Task</code> tool is the spawning mechanism. A coordinator needs <code>"Task"</code> in its own <code>allowedTools</code> before it can invoke subagents at all. Each subagent type is configured through an <code>AgentDefinition</code> — a description, its own system prompt, and its own tool restrictions, independent of the coordinator's.</p>
+
+<pre><code>// Coordinator turn: spawn two research subagents in parallel.
+// Both Task calls appear in ONE assistant turn — that's what "parallel" means here,
+// not two sequential turns.
+const musicResearch = {
+  type: "tool_use" as const,
+  name: "Task",
+  input: {
+    subagent_type: "web-search",
+    description: "Research AI adoption in music production",
+    prompt: `Research how AI is used in music production and distribution.
+Return findings as an array of { claim: string; source: string; date: string }.`,
+  },
+};
+
+const filmResearch = {
+  type: "tool_use" as const,
+  name: "Task",
+  input: {
+    subagent_type: "web-search",
+    description: "Research AI adoption in film production",
+    prompt: `Research how AI is used in film production and post-production.
+Return findings as an array of { claim: string; source: string; date: string }.`,
+  },
+};</code></pre>
+
+<p>Notice each prompt is self-contained — a full brief with its own scope and expected return shape, not "continue what we were doing." That's the explicit-context-passing requirement in practice.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Where this actually breaks in production</div>
+  <p style="margin-top:0">The official exam guide's own sample question makes the point precisely: a coordinator researching "the impact of AI on creative industries" decomposes the topic into <em>digital art, graphic design, and photography</em> — three visual-arts subtasks. Every subagent executes flawlessly. The final report still completely misses music, writing, and film.</p>
+  <p style="margin-bottom:0">The subagents aren't the problem. <strong>The coordinator's task decomposition was too narrow</strong>, and no downstream agent can recover coverage the coordinator never assigned. This is a distinct failure mode from "a subagent did its job badly" — the exam wants you to tell the two apart.</p>
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p>Every multi-agent system you'll design — the customer support agent, the research pipeline, the CI reviewer — is hub-and-spoke underneath. Getting decomposition scope right at the coordinator is a design decision made once, up front; getting it wrong is invisible until you notice a whole category of output is missing.</p>
+
+<p><strong>Primary source:</strong> Anthropic's <a href="https://docs.claude.com/en/api/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK overview</a> covers subagent configuration and the <code>Task</code> tool directly — this lesson compresses Task Statements 1.2 and 1.3 from the official exam guide.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A coordinator decomposes "impact of AI on creative industries" into three subtasks covering only visual arts. Every subagent completes successfully, but music, writing, and film are missing entirely. What's the root cause?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">The coordinator's task decomposition was too narrow</button>
+    <button class="quiz-option">The synthesis subagent failed to flag the coverage gap</button>
+    <button class="quiz-option">The web search subagent's queries were not broad enough</button>
+    <button class="quiz-option">The document analysis subagent filtered out valid sources</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — every subagent did exactly what it was assigned. The gap was created upstream, when the coordinator scoped the subtasks." data-incorrect-text="Not quite — each subagent executed its assigned task correctly. The problem is what it was assigned, which traces back to the coordinator's decomposition."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Which statement about subagents spawned via the Task tool is correct?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">They require explicit context passed in their prompt</button>
+    <button class="quiz-option">They automatically inherit the coordinator's conversation history</button>
+    <button class="quiz-option">They share memory across separate Task tool invocations</button>
+    <button class="quiz-option">They can spawn without allowedTools including "Task"</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — subagent context is isolated by default. Anything the coordinator wants a subagent to know has to be written directly into its prompt." data-incorrect-text="Subagent context is isolated — nothing is inherited automatically. The coordinator must pass what it needs explicitly, in the prompt."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Why route all subagent communication through the coordinator instead of letting subagents message each other directly?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">For observability, error handling, and controlled information flow</button>
+    <button class="quiz-option">Because subagents cannot execute tools without a coordinator present</button>
+    <button class="quiz-option">Because direct subagent communication always increases token costs</button>
+    <button class="quiz-option">Because the Task tool technically blocks peer-to-peer messaging</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — hub-and-spoke keeps every handoff visible to and controllable by one place, which is what makes multi-agent systems debuggable at all." data-incorrect-text="The real reason is architectural: routing through the coordinator gives you a single point of observability and control over how information and errors flow."></div>
+</div>
+
+<p class="ask-agent">Want to see how AgentDefinition tool restrictions compare to what you configured for the coordinator itself? Just ask.</p>
+
+<div class="nav-links">
+  <a href="./0001-the-agentic-loop.html">← Lesson 1: The Agentic Loop</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0003-hooks-and-enforcement.html">Lesson 3: Hooks →</a>
+</div>

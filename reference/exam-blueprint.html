@@ -112,9 +112,39 @@
 </ol>
 
 <h2>Explicitly out of scope</h2>
-<p>Fine-tuning · API auth/billing/rate limits · specific programming language/framework internals · MCP server hosting/infra · Claude's internal architecture/training/RLHF · embeddings/vector DBs · computer use · vision · streaming API internals · prompt caching internals · tokenization algorithms · cloud provider (AWS/GCP/Azure) specifics.</p>
+<p>Fine-tuning · API auth/billing/rate limits · specific programming language/framework internals · MCP server hosting/infra · Claude's internal architecture/training/RLHF · embeddings/vector DBs · computer use · vision · streaming API internals · prompt caching internals · tokenization algorithms · cloud provider (AWS/GCP/Azure) specifics · performance benchmarking/model comparison metrics.</p>
+
+<h2>Appendix: technologies &amp; concepts checklist</h2>
+<p>Straight from the official guide's own appendix — if a term here doesn't ring a bell, that's a gap to close before exam day.</p>
+<table>
+<tr><th>Area</th><th>What to know</th></tr>
+<tr><td>Claude Agent SDK</td><td>Agent definitions, agentic loops, <code>stop_reason</code> handling, hooks (PostToolUse, tool call interception), subagent spawning via <code>Task</code>, <code>allowedTools</code></td></tr>
+<tr><td>MCP</td><td>Servers, tools, resources, <code>isError</code> flag, tool descriptions, tool distribution, <code>.mcp.json</code>, environment variable expansion</td></tr>
+<tr><td>Claude Code</td><td>CLAUDE.md hierarchy, <code>.claude/rules/</code>, <code>.claude/commands/</code>, <code>.claude/skills/</code> (<code>context: fork</code>, <code>allowed-tools</code>, <code>argument-hint</code>), plan mode, direct execution, <code>/memory</code>, <code>/compact</code>, <code>--resume</code>, <code>fork_session</code>, Explore subagent</td></tr>
+<tr><td>Claude Code CLI</td><td><code>-p</code>/<code>--print</code>, <code>--output-format json</code>, <code>--json-schema</code></td></tr>
+<tr><td>Claude API</td><td><code>tool_use</code> with JSON schemas, <code>tool_choice</code> (auto/any/forced), <code>stop_reason</code> values, <code>max_tokens</code>, system prompts</td></tr>
+<tr><td>Message Batches API</td><td>50% cost savings, 24h window, <code>custom_id</code> correlation, polling, no multi-turn tool calling</td></tr>
+<tr><td>JSON Schema / Pydantic</td><td>Required vs. optional, enums, nullable fields, <code>"other"</code>+detail pattern, strict mode, semantic vs. syntax validation</td></tr>
+<tr><td>Built-in tools</td><td>Read, Write, Edit, Bash, Grep, Glob — purpose and selection criteria for each</td></tr>
+<tr><td>Prompting</td><td>Few-shot for ambiguous scenarios and format consistency, prompt chaining, explicit criteria</td></tr>
+<tr><td>Context &amp; reliability</td><td>Token budgets, progressive summarization, lost-in-the-middle, scratchpad files, session isolation, confidence calibration, stratified sampling</td></tr>
+</table>
+
+<h2>8 exam preparation recommendations (official)</h2>
+<ol>
+  <li>Build an agent with the Claude Agent SDK — a complete loop with tool calling, error handling, session management, subagent spawning.</li>
+  <li>Configure Claude Code for a real project — CLAUDE.md hierarchy, <code>.claude/rules/</code>, a custom skill, at least one MCP server.</li>
+  <li>Design and test MCP tools — differentiated descriptions, structured errors, tool-selection reliability under ambiguity.</li>
+  <li>Build a structured data extraction pipeline — <code>tool_use</code> + JSON schema, validation-retry, optional/nullable fields, batch processing.</li>
+  <li>Practice prompt engineering — few-shot for ambiguity, explicit review criteria, multi-pass review architectures.</li>
+  <li>Study context management patterns — structured fact extraction, scratchpad files, subagent delegation for context limits.</li>
+  <li>Review escalation and human-in-the-loop patterns — when to escalate vs. resolve autonomously, confidence-based review routing.</li>
+  <li>Complete the official practice exam before sitting the real one (link provided separately by Anthropic — see RESOURCES.md for status).</li>
+</ol>
+<p>Recommendations 1–4 map directly to <a href="./preparation-exercises.html">Preparation Exercises</a> 1–4. Recommendations 5–7 are covered across Lessons 10–14. Recommendation 8 is tracked as an open resource gap.</p>
 
 <div class="nav-links">
   <a href="../lessons/0001-the-agentic-loop.html">← Lesson 1: The Agentic Loop</a>
+  <a href="./preparation-exercises.html">Preparation Exercises</a>
   <a href="./glossary.html">Glossary →</a>
 </div>

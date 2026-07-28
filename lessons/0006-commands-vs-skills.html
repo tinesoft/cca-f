@@ -1,0 +1,85 @@
+<title>Lesson 6: Slash Commands vs. Skills</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 6 · Domain 3 — Claude Code Configuration &amp; Workflows (20% of exam)</p>
+<h1>Slash Commands vs. Skills</h1>
+<p>CLAUDE.md is always loaded, for every file, every session. Commands and skills are the opposite: on-demand, invoked when you actually need them. This lesson is about picking the right one, and configuring it so it behaves the way you expect.</p>
+
+<h2>Slash commands: shared vs. personal, by directory</h2>
+<p>Same personal/shared split as CLAUDE.md, and for the same reason:</p>
+<ul>
+  <li><strong><code>.claude/commands/</code></strong> — project-scoped, version-controlled, available to every developer the moment they clone or pull.</li>
+  <li><strong><code>~/.claude/commands/</code></strong> — user-scoped, personal, invisible to teammates.</li>
+</ul>
+<p>If you want a <code>/review</code> command running your team's checklist for everyone automatically, it belongs in <code>.claude/commands/</code> in the repo — not in your home directory, and not described in CLAUDE.md (CLAUDE.md holds context and instructions, not command definitions).</p>
+
+<h2>Skills: on-demand workflows with real configuration</h2>
+<p>A skill lives in <code>.claude/skills/</code> as a <code>SKILL.md</code> file with frontmatter that actually changes its runtime behavior:</p>
+<pre><code>---
+name: audit-deps
+description: Audit dependencies for known vulnerabilities and outdated majors
+context: fork
+allowed-tools: Read, Grep, Bash
+argument-hint: "[package-name]"
+---</code></pre>
+<ul>
+  <li><strong><code>context: fork</code></strong> — runs the skill in an isolated sub-agent context. Its (often verbose) output — codebase analysis, brainstormed alternatives — never pollutes the main conversation. Only the result comes back.</li>
+  <li><strong><code>allowed-tools</code></strong> — restricts what the skill can touch while it runs. Scope a skill to read-only tools, for instance, if it should never be able to take a destructive action.</li>
+  <li><strong><code>argument-hint</code></strong> — prompts the developer for required parameters if they invoke the skill without supplying them.</li>
+</ul>
+<p>Personal variants work the same way as commands: create your own copy under a different name in <code>~/.claude/skills/</code> without touching the shared team version.</p>
+
+<h2>Choosing between the two</h2>
+<p>Skills are for on-demand, task-specific workflows you invoke when needed. CLAUDE.md is for standards that should apply to <em>every</em> session automatically, with no invocation required. If you find yourself writing "when doing X, do Y" inside CLAUDE.md, and X is something that happens occasionally rather than constantly, that's usually a skill trying to escape.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Grounded in the official guide's own sample question</div>
+  Sample Question 4 in the exam guide asks exactly this: a team wants a <code>/review</code> command with their checklist, available to every developer on clone. The correct answer is <code>.claude/commands/</code> in the repo — not personal <code>~/.claude/commands/</code>, not CLAUDE.md, and not a fabricated <code>.claude/config.json</code> commands array (which doesn't exist in Claude Code). Watch for exactly this shape of distractor: a plausible-sounding config mechanism that simply isn't real.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://code.claude.com/docs" target="_blank" rel="noopener">Extend Claude Code</a> docs cover both custom commands and Agent Skills with full frontmatter reference — this lesson compresses Task Statement 3.2.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You want a /review slash command with your team's checklist, available to every developer the moment they clone the repo. Where do you put it?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">In .claude/commands/ inside the project repository</button>
+    <button class="quiz-option">In ~/.claude/commands/ inside each developer's home directory</button>
+    <button class="quiz-option">Inside the CLAUDE.md file at the project root</button>
+    <button class="quiz-option">In a .claude/config.json file with a commands array</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — project-scoped commands live in .claude/commands/ and travel with the repo via version control, reaching every developer automatically." data-incorrect-text="Personal command directories don't reach teammates, CLAUDE.md isn't for command definitions, and .claude/config.json with a commands array isn't a real Claude Code mechanism."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A skill produces very verbose codebase-analysis output you don't want cluttering the main conversation. Which frontmatter option isolates it?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">context: fork</button>
+    <button class="quiz-option">allowed-tools: Read</button>
+    <button class="quiz-option">argument-hint: "[target]"</button>
+    <button class="quiz-option">paths: ["**/*"]</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — context: fork runs the skill in its own isolated context, so only its final result returns to the main conversation." data-incorrect-text="allowed-tools restricts capability, argument-hint prompts for parameters, and paths belongs to .claude/rules/ — none of them isolate output. context: fork does exactly that."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. When should something live in a skill rather than CLAUDE.md?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">When it's an on-demand, task-specific workflow, not universal</button>
+    <button class="quiz-option">When every session should always load it automatically</button>
+    <button class="quiz-option">When it must apply identically to every directory at once</button>
+    <button class="quiz-option">When only project-level configuration is wanted, never personal</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — that's the whole distinction: CLAUDE.md is always-on context, skills are invoked on demand for specific tasks." data-incorrect-text="Always-on, universal, directory-wide application is exactly what CLAUDE.md is for. Skills exist for the opposite case: things you invoke occasionally, on purpose."></div>
+</div>
+
+<p class="ask-agent">Want to sketch a skill's frontmatter for a workflow you actually use? Tell me what it should do and I'll help you configure it.</p>
+
+<div class="nav-links">
+  <a href="./0005-claude-md-hierarchy-and-rules.html">← Lesson 5: CLAUDE.md Hierarchy</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0007-plan-mode-and-cicd.html">Lesson 7: Plan Mode &amp; CI/CD →</a>
+</div>

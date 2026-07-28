@@ -1,0 +1,88 @@
+<title>Lesson 8: Tool Descriptions &amp; Structured MCP Errors</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 8 · Domain 2 — Tool Design &amp; MCP Integration (18% of exam)</p>
+<h1>Tool Descriptions &amp; Structured MCP Errors</h1>
+<p>Domain 2 is about the interface between Claude and the systems it calls. The two ideas in this lesson both come down to the same principle: <strong>the model can only act as well as the information you give it</strong> — about which tool to pick, and about what went wrong when one fails.</p>
+
+<h2>Descriptions are the selection mechanism</h2>
+<p>Not the tool's name. Not its internal implementation. The <em>description</em> is what the model actually reads to decide which tool fits a given request. Minimal or near-identical descriptions across similar tools produce unreliable routing — not because the model is confused, but because it genuinely doesn't have enough information to differentiate.</p>
+<p>The official guide's sample question is a clean illustration: <code>get_customer</code> ("Retrieves customer information") and <code>lookup_order</code> ("Retrieves order details") — both minimal, both accepting similar identifier formats. The agent frequently calls <code>get_customer</code> when a user asks about an order. The fix isn't infrastructure. It's <strong>expanding each description</strong> with input formats, example queries, edge cases, and explicit boundaries — telling the model when to use this tool <em>versus</em> the similar one next to it. Few-shot examples, a routing layer, or consolidating both tools into one are all more effort than the situation calls for as a first move.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Fix the description before you build infrastructure</div>
+  This is the Domain 2 version of Domain 1's "hooks vs. prompts" lesson, aimed the other direction: don't reach for a routing classifier or a merged mega-tool when the actual gap is a couple of missing sentences in a description. Infrastructure is the right call eventually — just not the <em>first</em> call.
+</div>
+
+<h2>Structured errors: give the agent something to act on</h2>
+<p>MCP tool failures set <code>isError: true</code>. What matters is everything else in that response. A generic <code>{ isError: true, message: "Operation failed" }</code> tells the calling agent nothing — should it retry? Ask the user? Give up? Structured metadata answers that:</p>
+
+<pre><code>interface McpToolError {
+  isError: true;
+  errorCategory: "transient" | "validation" | "permission" | "business";
+  isRetryable: boolean;
+  message: string; // human-readable, safe to relay to the user
+}
+
+// Bad — the caller can't decide anything from this
+return { isError: true, message: "Operation failed" };
+
+// Good — the caller knows exactly what to do next
+return {
+  isError: true,
+  errorCategory: "business",
+  isRetryable: false,
+  message: "Refund exceeds the $500 policy limit for automated approval.",
+} satisfies McpToolError;</code></pre>
+
+<p><code>errorCategory</code> distinguishes transient failures (timeouts, unavailability — worth retrying) from validation errors (bad input — retrying won't help), permission errors, and business-rule violations (like the refund limit above — never retryable, needs a different path entirely). <code>isRetryable</code> makes that explicit rather than implied, preventing wasted retry attempts on errors that can't succeed no matter how many times you try.</p>
+
+<h2>One more distinction: failure vs. nothing found</h2>
+<p>A search that legitimately returns zero matches is not an error — it's a successful query with an empty result. Conflating "the tool couldn't run" with "the tool ran and found nothing" removes information the agent needs to respond correctly (retry a broken call vs. tell the user honestly that nothing matched).</p>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> the <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a> specification defines the <code>isError</code> pattern and tool description conventions directly — this lesson compresses Task Statements 2.1 and 2.2.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. get_customer and lookup_order have minimal, nearly identical descriptions, and the agent frequently calls the wrong one for order questions. What's the most effective first fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Expand each description with formats, examples, and boundaries</button>
+    <button class="quiz-option">Add few-shot examples showing correct routing to the prompt</button>
+    <button class="quiz-option">Build a keyword-based routing layer before either tool runs</button>
+    <button class="quiz-option">Merge both tools into one generic lookup_entity tool</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — descriptions are the model's primary selection signal. A low-effort fix at the source outperforms added infrastructure here." data-incorrect-text="These all help, but each adds effort or overhead the situation doesn't need yet. The root cause is inadequate descriptions — fix that first."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A tool call fails and returns only { isError: true, message: "Operation failed" }. What's wrong with this response?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">It gives the agent no basis for deciding how to recover</button>
+    <button class="quiz-option">isError should never appear in a valid MCP response</button>
+    <button class="quiz-option">MCP tools aren't permitted to return error objects</button>
+    <button class="quiz-option">The message field is reserved for successful responses only</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — without errorCategory and isRetryable, the calling agent has no way to know whether retrying, escalating, or giving up is appropriate." data-incorrect-text="isError is exactly the right flag to set on failure — the problem isn't that it's present, it's that nothing else in the response tells the agent what to do next."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. A search tool returns zero matches for a well-formed, valid query. How should this be represented?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A successful, valid empty result — not an error at all</button>
+    <button class="quiz-option">errorCategory: "transient" so the agent retries automatically</button>
+    <button class="quiz-option">isError: true with isRetryable: true to prompt a retry</button>
+    <button class="quiz-option">The same generic failure used for a timeout or outage</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — zero results from a well-formed query is a legitimate outcome, not a failure. Marking it as an error would push the agent toward pointless retries." data-incorrect-text="This is a valid outcome, not a failure — treating it as an error conflates 'nothing found' with 'the tool broke,' which loses information the agent needs to respond honestly."></div>
+</div>
+
+<p class="ask-agent">Want to draft a tool description for something you're actually building, and stress-test whether it's specific enough? Share it and I'll help sharpen it.</p>
+
+<div class="nav-links">
+  <a href="./0007-plan-mode-and-cicd.html">← Lesson 7: Plan Mode &amp; CI/CD</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0009-tool-distribution-and-mcp-scoping.html">Lesson 9: Scoping Tools →</a>
+</div>

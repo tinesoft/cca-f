@@ -1,0 +1,83 @@
+<title>Lesson 12: Batch Processing &amp; Independent Review</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 12 · Domain 4 — Prompt Engineering &amp; Structured Output (20% of exam)</p>
+<h1>Batch Processing &amp; Independent Review</h1>
+<p>Closing out Domain 4 with two efficiency questions: when should a workload run asynchronously instead of live, and when should review happen in a different "mind" than the one that generated the work?</p>
+
+<h2>The Message Batches API: the tradeoff in one line</h2>
+<p><strong>50% cheaper, up to a 24-hour processing window, no latency SLA.</strong> That's the whole shape of the decision. It fits non-blocking, latency-tolerant workloads well — overnight reports, weekly audits, nightly test generation. It's the wrong tool the moment something is on a blocking path, like a pre-merge CI check that needs to complete in minutes: there's no guarantee it will, and occasionally it won't.</p>
+<p>One structural limit to remember: the Batch API doesn't support multi-turn tool calling within a single request — it can't execute a tool mid-request and reason over the result inside that same batched call.</p>
+
+<pre><code>const batch = await client.messages.batches.create({
+  requests: documents.map((doc) => ({
+    custom_id: doc.id, // correlates each response back to its request
+    params: {
+      model: "claude-sonnet-5",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: extractionPrompt(doc) }],
+      tools: [extractionTool],
+    },
+  })),
+});
+// Poll (or wait up to 24h), then match results back to documents via custom_id.</code></pre>
+
+<p><code>custom_id</code> is what makes batch results usable at scale — it's how you know which response belongs to which original request once results come back out of order. When a batch partially fails, resubmit only the failed <code>custom_id</code>s (with whatever fix they needed — chunking a document that exceeded context limits, say) rather than resubmitting the whole batch. And refine your prompt against a small sample before scaling to the full volume — a batch is expensive to iterate on once it's already 24 hours deep.</p>
+
+<h2>Why the same session shouldn't review its own work</h2>
+<p>A model that just generated something carries its own reasoning forward in context. It's not lying to itself exactly — it's that the reasoning that led to a decision is still right there, making that decision feel settled rather than something to re-examine. An independent instance, with none of that prior reasoning in its context, catches more — it has nothing invested in the original answer being right.</p>
+
+<h2>Multi-pass review for large surface areas</h2>
+<p>A single pass over a large multi-file change dilutes attention and tends to produce vaguer, sometimes contradictory findings. Splitting the work — a focused per-file pass for local issues, plus a separate cross-file integration pass for things like data flowing incorrectly between files — produces sharper results than either alone. This is the same "attention dilution" idea from Lesson 4's task decomposition, applied specifically to review work.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Matching latency requirements to API choice</div>
+  If you only remember one thing from this lesson: ask "does this block something a person or a pipeline is waiting on right now?" Yes → synchronous Messages API. No, and it can tolerate up to 24 hours → Batches API, at half the cost. Getting this backwards either wastes money (paying full price for something that could've batched) or breaks a deadline (batching something that needed to finish in minutes).
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://platform.claude.com/docs" target="_blank" rel="noopener">Claude API docs</a> cover the Message Batches API directly, including <code>custom_id</code> correlation and processing windows — this lesson closes Domain 4, compressing Task Statements 4.5 and 4.6.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You need pre-merge PR checks to block a build within minutes. Should you use the Message Batches API?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">No — batch processing has no latency guarantee, unsuitable here</button>
+    <button class="quiz-option">Yes — batches always complete faster than synchronous calls</button>
+    <button class="quiz-option">Yes — batching is required for any structured JSON output</button>
+    <button class="quiz-option">No — the Batches API cannot process code review prompts</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a blocking, time-sensitive check needs a latency guarantee the Batch API explicitly doesn't offer. This is a synchronous-API job." data-incorrect-text="The Batch API trades latency guarantees for cost savings — the opposite of what a minutes-scale blocking check needs. It's not a capability limitation, it's a timing mismatch."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. 40 of 500 batched extraction requests fail validation. What's the most efficient recovery?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Resubmit only the 40 failed requests, identified by custom_id</button>
+    <button class="quiz-option">Resubmit the entire batch of 500 requests from scratch</button>
+    <button class="quiz-option">Discard the batch entirely and switch to synchronous calls</button>
+    <button class="quiz-option">Ignore the 40 failures since 92% succeeded overall</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — custom_id lets you isolate exactly which requests failed and resubmit only those, without re-running the 460 that already succeeded." data-incorrect-text="Re-running everything wastes the successful 460, abandoning batching wastes its cost advantage, and silently dropping the failures loses real data. custom_id-targeted resubmission is the efficient path."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Why does an independent Claude instance often catch more issues reviewing code than the same instance that generated it?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">It lacks the generation session's reasoning context and bias</button>
+    <button class="quiz-option">It always runs on a more capable underlying model</button>
+    <button class="quiz-option">The generating session is blocked from running reviews at all</button>
+    <button class="quiz-option">Independent instances automatically get a larger context window</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a fresh instance has no prior investment in the original reasoning being correct, so it evaluates the result on its own terms." data-incorrect-text="Model capability and context size aren't the differentiator here — it's specifically the absence of the generating session's own reasoning trail that makes independent review more effective."></div>
+</div>
+
+<p class="ask-agent">That's all of Domain 4. Ready for Domain 5, the last one — context management and reliability? Say the word when you're ready.</p>
+
+<div class="nav-links">
+  <a href="./0011-structured-output-and-validation.html">← Lesson 11: Structured Output &amp; Validation</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0013-context-preservation-and-escalation.html">Lesson 13: Context &amp; Escalation →</a>
+</div>

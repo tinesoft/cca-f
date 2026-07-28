@@ -1,0 +1,103 @@
+<title>Lesson 3: Hooks — Guaranteed Compliance vs. Probabilistic Guidance</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 3 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
+<h1>Hooks: Guaranteed Compliance vs. Probabilistic Guidance</h1>
+<p>This is the single most-tested distinction in Domain 1, and it shows up disguised in half a dozen different scenarios: <strong>a prompt instruction is a suggestion; a hook is a guarantee.</strong> Knowing which one a situation actually needs is the skill.</p>
+
+<h2>Prompts have a non-zero failure rate</h2>
+<p>Telling the model in a system prompt that "customer verification via <code>get_customer</code> is mandatory before order operations" will work most of the time. Most of the time is not good enough when the downstream action is a financial one. The official exam guide's own numbers make this concrete: a support agent skips <code>get_customer</code> and calls <code>lookup_order</code> on the customer's stated name alone in <strong>12% of cases</strong> — occasionally misidentifying accounts and issuing refunds to the wrong person.</p>
+<p>No amount of stronger wording or additional few-shot examples drives that number to zero, because prompt-based compliance is probabilistic by nature. The fix isn't a better sentence — it's removing the possibility entirely.</p>
+
+<h2>Programmatic prerequisites</h2>
+<p>A programmatic prerequisite gate blocks a tool call outright until an earlier one has produced a required result — no model judgment involved:</p>
+
+<pre><code>// Guard executed before any process_refund call is allowed through.
+// This is enforced in code, not requested in a prompt.
+function canCallProcessRefund(state: { verifiedCustomerId: string | null }): boolean {
+  return state.verifiedCustomerId !== null;
+}
+
+if (toolCall.name === "process_refund" &amp;&amp; !canCallProcessRefund(state)) {
+  throw new Error("process_refund blocked: get_customer has not returned a verified ID yet");
+}</code></pre>
+
+<h2>Hooks: interception at two points</h2>
+<p>Agent SDK hooks give you the same guarantee at two different moments in the loop:</p>
+<ul>
+  <li><strong>Result interception (<code>PostToolUse</code>)</strong> — rewrite a tool's result before Claude ever reasons about it. Classic use: normalizing inconsistent data formats coming from different MCP tools.</li>
+  <li><strong>Call interception</strong> — inspect an outgoing tool call and block it if it violates a policy, before it executes at all.</li>
+</ul>
+
+<pre><code>// PostToolUse hook: normalize timestamp formats before Claude sees them.
+// Different MCP tools return Unix epoch, ISO 8601, or locale strings —
+// the model shouldn't have to reconcile that itself.
+function postToolUse(event: ToolResultEvent): ToolResultEvent {
+  if (event.toolName === "lookup_order") {
+    event.result.createdAt = normalizeToIso8601(event.result.createdAt);
+  }
+  return event;
+}
+
+// Call-interception hook: block a policy-violating refund before it runs.
+function preToolUse(call: ToolCallEvent): ToolCallEvent | Blocked {
+  if (call.toolName === "process_refund" &amp;&amp; call.input.amount > 500) {
+    return { blocked: true, reason: "Refunds over $500 require human approval" };
+  }
+  return call;
+}</code></pre>
+
+<h2>When a human takes over mid-process</h2>
+<p>If a hook blocks an action and escalates, the human agent picking it up usually has <em>no access to the conversation transcript</em>. The handoff has to be self-contained: customer details, root cause, the specific action that was blocked, and a recommended next step — not "see chat history."</p>
+
+<div class="callout accent">
+  <div class="callout-title">The recurring distractor here</div>
+  Whenever a question describes a reliability problem with real consequences — money, identity, compliance — and one answer option is "improve the system prompt / add few-shot examples," treat that as a trap unless nothing programmatic is available. It <em>helps</em>. It does not <em>guarantee</em>. The exam is testing whether you reach for the deterministic fix first when the stakes justify it.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> read Anthropic's <a href="https://docs.claude.com/en/api/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK overview</a> for the hooks API surface (<code>PostToolUse</code> and related lifecycle events) — this lesson compresses Task Statements 1.4 and 1.5 from the official exam guide, including its own worked example.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. Production data shows your agent skips get_customer 12% of the time before calling process_refund, occasionally causing misidentified refunds. Which fix actually guarantees this can't happen again?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A programmatic prerequisite blocking refunds until verified</button>
+    <button class="quiz-option">A system prompt stating that verification is mandatory</button>
+    <button class="quiz-option">Few-shot examples showing get_customer called first</button>
+    <button class="quiz-option">A routing classifier that enables only relevant tools</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a programmatic gate makes the ordering impossible to violate. Everything else still relies on the model complying, which is exactly the 12% failure mode you're trying to eliminate." data-incorrect-text="This is the classic trap: it improves compliance but doesn't guarantee it. Only a programmatic prerequisite removes the possibility of the wrong order entirely."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. When should you reach for a hook instead of adjusting a prompt?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">When the business rule needs a deterministic guarantee</button>
+    <button class="quiz-option">When you want responses to sound more natural</button>
+    <button class="quiz-option">When output formatting is merely inconsistent</button>
+    <button class="quiz-option">When few-shot examples already work well enough</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — hooks are for the cases where 'usually right' isn't an acceptable outcome." data-incorrect-text="Hooks earn their complexity cost specifically when a violation is unacceptable, not merely undesirable — that's the deterministic-guarantee test."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. A PostToolUse hook is best suited for which of these?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Normalizing inconsistent tool data before Claude reasons on it</button>
+    <button class="quiz-option">Deciding which subagent a coordinator should invoke next</button>
+    <button class="quiz-option">Writing the system prompt describing available tools</button>
+    <button class="quiz-option">Choosing between plan mode and direct execution upfront</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — PostToolUse fires after a tool result comes back, which makes it the natural place to clean and normalize that data before it reaches the model." data-incorrect-text="PostToolUse hooks operate on tool results, after execution — normalization is exactly its use case. The other options belong to different task statements entirely."></div>
+</div>
+
+<p class="ask-agent">Curious how hook-based interception compares to the MCP-side structured error responses coming up in Domain 2? Ask any time.</p>
+
+<div class="nav-links">
+  <a href="./0002-coordinator-subagent-orchestration.html">← Lesson 2: Coordinator/Subagent Orchestration</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0004-task-decomposition-and-sessions.html">Lesson 4: Task Decomposition →</a>
+</div>

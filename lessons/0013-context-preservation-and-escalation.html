@@ -1,0 +1,87 @@
+<title>Lesson 13: Preserving Context &amp; Calibrating Escalation</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 13 · Domain 5 — Context Management &amp; Reliability (15% of exam)</p>
+<h1>Preserving Context &amp; Calibrating Escalation</h1>
+<p>The final domain, and the lightest-weighted at 15% — but don't mistake that for "less tested carefully." These two task statements come up constantly disguised inside the other four domains' scenarios, because context and reliability problems are what production actually looks like.</p>
+
+<h2>Lost in the middle</h2>
+<p>Models reliably attend to the beginning and end of a long input; information buried in the middle is where things get dropped. Progressive summarization compounds this — condensing a conversation's history repeatedly tends to blur exactly the details that matter most: exact amounts, dates, order numbers, what the customer specifically said they expected.</p>
+<p>The fix is structural, not "try harder to remember": keep a <strong>persistent case-facts block</strong>, included verbatim in every prompt, sitting outside whatever gets summarized.</p>
+
+<pre><code>interface CaseFacts {
+  orderId: string;
+  orderTotal: number;
+  orderDate: string;
+  customerStatedExpectation: string;
+  refundStatus: "none" | "pending" | "processed";
+}
+
+function buildPrompt(facts: CaseFacts, history: string, latestTurn: string) {
+  return `CASE FACTS (always accurate, do not summarize):
+${JSON.stringify(facts, null, 2)}
+
+CONVERSATION SO FAR:
+${history}
+
+LATEST MESSAGE:
+${latestTurn}`;
+}</code></pre>
+
+<p>The same principle applies to tool output: a full order lookup might return 40+ fields when only 5 are ever relevant downstream. Trim before it accumulates in context rather than after — verbose, mostly-irrelevant tool results consume tokens disproportionately to what they're worth, and they're exactly the kind of "middle" content that gets lost anyway.</p>
+
+<h2>Escalation: calibrated on the right signals</h2>
+<p>The official guide's sample question is a direct hit here: an agent achieves only 55% first-contact resolution against an 80% target — because it escalates <em>simple</em> cases (standard damage replacements with photo evidence) while trying to autonomously push through cases that actually need a real policy exception. Both are miscalibration, in opposite directions.</p>
+<p>The fix isn't a confidence score or sentiment detection — both are unreliable proxies for actual case complexity, and in this exact scenario the agent is already <em>confidently</em> wrong on the hard cases. The fix is <strong>explicit escalation criteria with few-shot examples</strong> demonstrating the boundary directly: escalate immediately on an explicit customer request for a human, on a policy gap or exception (not just "this seems hard"), on genuine inability to make progress, or on multiple ambiguous matches that need clarification rather than a guessed selection.</p>
+
+<div class="callout accent">
+  <div class="callout-title">What escalation should never be based on</div>
+  Sentiment analysis and self-reported confidence scores both fail for the same reason: they measure how the interaction <em>feels</em>, not whether the situation actually requires human judgment or policy authority the agent doesn't have. A calm-sounding customer can have a policy-exception case; a frustrated one can have a trivially resolvable request. Escalate on the objective triggers, not the emotional temperature.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://platform.claude.com/docs" target="_blank" rel="noopener">Claude API docs</a> and the <a href="https://docs.claude.com/en/api/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK overview</a> cover context window management directly — this lesson compresses Task Statements 5.1 and 5.2.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. Your agent achieves only 55% first-contact resolution against an 80% target. It escalates simple cases while trying to autonomously resolve ones needing a real policy exception. What's the most effective fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Add explicit escalation criteria with few-shot examples</button>
+    <button class="quiz-option">Auto-route to a human below a self-reported confidence score</button>
+    <button class="quiz-option">Train a separate classifier to predict escalation upfront</button>
+    <button class="quiz-option">Detect negative sentiment and escalate past a threshold</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — the agent's decision boundary is miscalibrated in both directions. Explicit criteria with examples directly fix the boundary, without adding infrastructure the problem doesn't call for." data-incorrect-text="Confidence scores and sentiment are unreliable proxies — the agent is already confidently wrong on the hard cases. A classifier is over-engineered before prompt-level criteria have even been tried."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. Why keep a separate "case facts" block instead of relying on the summarized conversation history for order amounts and dates?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Summarization risks losing or blurring exact numeric details</button>
+    <button class="quiz-option">The Messages API rejects prompts containing structured JSON</button>
+    <button class="quiz-option">Conversation history is deleted automatically after ten turns</button>
+    <button class="quiz-option">Case facts blocks are required by the MCP protocol</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — repeated summarization is exactly where precise numbers and dates get quietly blurred. Keeping them in a persistent, unsummarized block avoids that entirely." data-incorrect-text="The Messages API handles structured content fine, and history isn't auto-deleted — the real risk is that summarization steps compress away exactly the precise details a case facts block is meant to protect."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Which of these should NOT be used as an escalation trigger on its own?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A self-reported confidence score from the model</button>
+    <button class="quiz-option">An explicit request from the customer for a human</button>
+    <button class="quiz-option">A policy that is silent on the customer's situation</button>
+    <button class="quiz-option">Multiple ambiguous customer matches needing clarification</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — self-reported confidence is poorly calibrated to actual complexity. The other three are exactly the kind of objective, explicit triggers that should drive escalation." data-incorrect-text="Explicit customer requests, policy gaps, and ambiguous matches are all legitimate, objective escalation triggers. Self-reported confidence is the unreliable one — it doesn't track real case complexity."></div>
+</div>
+
+<p class="ask-agent">Want to sketch escalation criteria for a system you're actually designing? Describe the domain and we'll draft the boundary together.</p>
+
+<div class="nav-links">
+  <a href="./0012-batches-and-multi-pass-review.html">← Lesson 12: Batches &amp; Multi-Pass Review</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0014-error-propagation-and-provenance.html">Lesson 14: Error Propagation &amp; Provenance →</a>
+</div>

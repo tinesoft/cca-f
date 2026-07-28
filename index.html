@@ -1,0 +1,162 @@
+<title>Claude Certified Architect – Foundations: Study Guide</title>
+<link rel="stylesheet" href="./assets/style.css">
+
+<p class="kicker">Self-study workspace · Unofficial</p>
+<h1>Claude Certified Architect – Foundations</h1>
+<p>A 14-lesson study guide covering every task statement in Anthropic's official CCA-F Exam Guide (v0.1) — the Claude Agent SDK, Model Context Protocol, Claude Code configuration, prompt engineering, and context management. Each lesson is short, cites its primary source, and ends with a retrieval-practice quiz.</p>
+
+<div class="callout">
+  <div class="callout-title">Not an Anthropic product</div>
+  This is an independently-built study aid, not official Anthropic material. Lesson content is grounded in and cites the official exam guide throughout; quiz questions here are written for this workspace, not reproductions of real exam or official practice-exam questions.
+</div>
+
+<h2>Domain weights</h2>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">1. Agentic Architecture &amp; Orchestration</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d1" style="width:27%"></span></span>
+  <span class="weight-bar-pct">27%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">3. Claude Code Configuration &amp; Workflows</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d3" style="width:20%"></span></span>
+  <span class="weight-bar-pct">20%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">4. Prompt Engineering &amp; Structured Output</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d4" style="width:20%"></span></span>
+  <span class="weight-bar-pct">20%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">2. Tool Design &amp; MCP Integration</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d2" style="width:18%"></span></span>
+  <span class="weight-bar-pct">18%</span>
+</div>
+<div class="weight-bar-row">
+  <span class="weight-bar-label">5. Context Management &amp; Reliability</span>
+  <span class="weight-bar-track"><span class="weight-bar-fill d5" style="width:15%"></span></span>
+  <span class="weight-bar-pct">15%</span>
+</div>
+
+<h2>Lessons</h2>
+
+<h3>Week 1 — Domain 1: Agentic Architecture &amp; Orchestration</h3>
+<ul class="toc-list">
+  <li class="toc-row">
+    <span class="toc-num">01</span>
+    <span class="domain-dot d1"></span>
+    <span class="toc-title"><a href="./lessons/0001-the-agentic-loop.html">The Agentic Loop</a></span>
+    <span class="toc-tag">Task 1.1</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">02</span>
+    <span class="domain-dot d1"></span>
+    <span class="toc-title"><a href="./lessons/0002-coordinator-subagent-orchestration.html">Coordinator/Subagent Orchestration</a></span>
+    <span class="toc-tag">Tasks 1.2–1.3</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">03</span>
+    <span class="domain-dot d1"></span>
+    <span class="toc-title"><a href="./lessons/0003-hooks-and-enforcement.html">Hooks: Guaranteed Compliance vs. Probabilistic Guidance</a></span>
+    <span class="toc-tag">Tasks 1.4–1.5</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">04</span>
+    <span class="domain-dot d1"></span>
+    <span class="toc-title"><a href="./lessons/0004-task-decomposition-and-sessions.html">Task Decomposition &amp; Session Lifecycle</a></span>
+    <span class="toc-tag">Tasks 1.6–1.7</span>
+  </li>
+</ul>
+
+<h3>Week 2 — Domain 3: Claude Code Configuration, then Domain 2: Tool Design &amp; MCP</h3>
+<ul class="toc-list">
+  <li class="toc-row">
+    <span class="toc-num">05</span>
+    <span class="domain-dot d3"></span>
+    <span class="toc-title"><a href="./lessons/0005-claude-md-hierarchy-and-rules.html">CLAUDE.md Hierarchy &amp; Path-Scoped Rules</a></span>
+    <span class="toc-tag">Tasks 3.1, 3.3</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">06</span>
+    <span class="domain-dot d3"></span>
+    <span class="toc-title"><a href="./lessons/0006-commands-vs-skills.html">Slash Commands vs. Skills</a></span>
+    <span class="toc-tag">Task 3.2</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">07</span>
+    <span class="domain-dot d3"></span>
+    <span class="toc-title"><a href="./lessons/0007-plan-mode-and-cicd.html">Plan Mode, Iterative Refinement &amp; CI/CD</a></span>
+    <span class="toc-tag">Tasks 3.4–3.6</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">08</span>
+    <span class="domain-dot d2"></span>
+    <span class="toc-title"><a href="./lessons/0008-tool-descriptions-and-mcp-errors.html">Tool Descriptions &amp; Structured Errors</a></span>
+    <span class="toc-tag">Tasks 2.1–2.2</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">09</span>
+    <span class="domain-dot d2"></span>
+    <span class="toc-title"><a href="./lessons/0009-tool-distribution-and-mcp-scoping.html">Scoping Tools Across Agents &amp; Servers</a></span>
+    <span class="toc-tag">Tasks 2.3–2.5</span>
+  </li>
+</ul>
+
+<h3>Week 3 — Domain 4: Prompt Engineering, then Domain 5: Context &amp; Reliability</h3>
+<ul class="toc-list">
+  <li class="toc-row">
+    <span class="toc-num">10</span>
+    <span class="domain-dot d4"></span>
+    <span class="toc-title"><a href="./lessons/0010-explicit-criteria-and-few-shot.html">Explicit Criteria &amp; Few-Shot Prompting</a></span>
+    <span class="toc-tag">Tasks 4.1–4.2</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">11</span>
+    <span class="domain-dot d4"></span>
+    <span class="toc-title"><a href="./lessons/0011-structured-output-and-validation.html">Structured Output &amp; Validation Loops</a></span>
+    <span class="toc-tag">Tasks 4.3–4.4</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">12</span>
+    <span class="domain-dot d4"></span>
+    <span class="toc-title"><a href="./lessons/0012-batches-and-multi-pass-review.html">Batch Processing &amp; Independent Review</a></span>
+    <span class="toc-tag">Tasks 4.5–4.6</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">13</span>
+    <span class="domain-dot d5"></span>
+    <span class="toc-title"><a href="./lessons/0013-context-preservation-and-escalation.html">Preserving Context &amp; Calibrating Escalation</a></span>
+    <span class="toc-tag">Tasks 5.1–5.2</span>
+  </li>
+  <li class="toc-row">
+    <span class="toc-num">14</span>
+    <span class="domain-dot d5"></span>
+    <span class="toc-title"><a href="./lessons/0014-error-propagation-and-provenance.html">Error Propagation, Scratchpads &amp; Provenance</a></span>
+    <span class="toc-tag">Tasks 5.3–5.6</span>
+  </li>
+</ul>
+
+<h2>Week 4 — Reference &amp; Integration</h2>
+<div class="ref-grid">
+  <div class="ref-card">
+    <a href="./reference/exam-blueprint.html">Exam Blueprint</a>
+    <p>Compressed cheat sheet: every task statement, domain weights, the 6 scenarios, appendix checklist.</p>
+  </div>
+  <div class="ref-card">
+    <a href="./reference/study-plan.html">Study Plan</a>
+    <p>Printable 4-week checklist tying every lesson and exercise to a week.</p>
+  </div>
+  <div class="ref-card">
+    <a href="./reference/preparation-exercises.html">Preparation Exercises</a>
+    <p>The 4 official hands-on build exercises, linked to prerequisite lessons.</p>
+  </div>
+  <div class="ref-card">
+    <a href="./reference/scenario-drills.html">Scenario Drills</a>
+    <p>18 mixed-domain practice questions across the 6 official exam scenarios.</p>
+  </div>
+  <div class="ref-card">
+    <a href="./reference/glossary.html">Glossary</a>
+    <p>Canonical terms, populated as they're demonstrated through lesson quizzes.</p>
+  </div>
+</div>
+
+<p class="ask-agent">Built with Claude Code's <code>teach</code> skill. Source: the official Claude Certified Architect – Foundations Exam Guide (Anthropic, PBC, v0.1).</p>

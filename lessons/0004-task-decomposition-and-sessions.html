@@ -1,0 +1,78 @@
+<title>Lesson 4: Task Decomposition &amp; Session Lifecycle</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 4 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
+<h1>Task Decomposition &amp; Session Lifecycle</h1>
+<p>Last lesson: when to enforce with a hook instead of a prompt. This lesson: two more decisions you make once per workflow — how to break a task into pieces, and how to manage a session across time — and closes out Domain 1's task statements.</p>
+
+<h2>Prompt chaining vs. dynamic decomposition</h2>
+<p>Two shapes of task decomposition, and the exam wants you to match the shape to the predictability of the task:</p>
+<ul>
+  <li><strong>Prompt chaining</strong> — a fixed sequence of steps, known in advance. A 12-file code review with three known aspects (style, security, performance) doesn't need to adapt mid-flight: run each file through a local pass, then run one cross-file integration pass at the end. Fixed, sequential, predictable.</li>
+  <li><strong>Dynamic decomposition</strong> — subtasks generated based on what's discovered along the way. "Add comprehensive tests to a legacy codebase" can't be planned upfront in full — you map structure first, identify high-impact areas, then build a prioritized plan that adapts as dependencies surface.</li>
+</ul>
+<p>Splitting a large review into a per-file pass plus a separate cross-file pass isn't just organizational tidiness — it avoids attention dilution, where a single giant pass produces vaguer, more contradictory findings than two focused ones. You'll see this idea again in Domain 4 applied to independent review instances.</p>
+
+<h2>Session state: resume vs. fork</h2>
+<pre><code>// Continue a specific prior investigation by name
+claude --resume refactor-auth-migration
+
+// Fork a shared analysis baseline into two independent branches,
+// each exploring a different approach from the same starting point
+claude --resume codebase-baseline --fork-session testing-strategy-a
+claude --resume codebase-baseline --fork-session testing-strategy-b</code></pre>
+
+<p><code>--resume &lt;name&gt;</code> continues one specific conversation. <code>fork_session</code> branches off a shared baseline — useful when you want to compare two divergent approaches without re-doing the shared analysis that got you to the fork point. The branches are independent after that: nothing done in one is visible in the other.</p>
+
+<div class="callout accent">
+  <div class="callout-title">The trap: resuming with stale tool results</div>
+  <p style="margin-top:0">If you resume a session after the files it previously analyzed have changed, the agent's prior tool results — reads, greps, analysis — are now stale. It doesn't know the code moved out from under it unless you tell it explicitly.</p>
+  <p style="margin-bottom:0">The official guide is direct about the fix: when resuming after code changes, name the specific files that changed so re-analysis is targeted, not full. And when prior tool results are extensively stale rather than mostly valid, <strong>starting a fresh session with an injected structured summary is more reliable than resuming at all.</strong></p>
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://docs.claude.com/en/api/agent-sdk/overview" target="_blank" rel="noopener">Agent SDK overview</a> covers session resumption and forking directly — this lesson closes out Domain 1, compressing Task Statements 1.6 and 1.7.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A code review touches 12 files with three review aspects (style, security, performance) known upfront and unlikely to change. Which decomposition fits best?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Prompt chaining through fixed, sequential review passes</button>
+    <button class="quiz-option">Dynamic decomposition adapting subtasks as issues surface</button>
+    <button class="quiz-option">One subagent handling all twelve files in one long pass</button>
+    <button class="quiz-option">Randomly assigning files across several parallel subagents</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — when the aspects are predictable and known in advance, a fixed sequential chain is simpler and more reliable than adaptive planning built for uncertainty you don't actually have." data-incorrect-text="Dynamic decomposition earns its complexity when the path forward isn't knowable upfront. Here it is knowable — prompt chaining is the better-matched tool."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. You resumed a session with --resume after several files it previously analyzed changed significantly. What's the risk?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">The agent may reason from stale, now-inaccurate tool results</button>
+    <button class="quiz-option">The session will simply refuse to resume at all</button>
+    <button class="quiz-option">fork_session will silently overwrite the original session</button>
+    <button class="quiz-option">The loop's iteration cap resets, and it runs indefinitely</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a resumed session doesn't know the world moved. Its prior reads and analysis are still in context as if they were current." data-incorrect-text="The resume itself succeeds silently — the danger is that stale prior tool results now look current to the model, unless you explicitly flag what changed."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. What does fork_session actually give you?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Independent branches exploring approaches from one baseline</button>
+    <button class="quiz-option">A shared memory space where forked sessions see each other</button>
+    <button class="quiz-option">Automatic merging of two sessions' histories back together</button>
+    <button class="quiz-option">A guarantee that stale tool results refresh automatically</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — fork_session gives you a clean split point. After that, the branches are fully independent of each other." data-incorrect-text="Forking creates independence, not sharing — each branch diverges on its own from the shared starting point, with no cross-visibility afterward."></div>
+</div>
+
+<p class="ask-agent">That's all of Domain 1. Want a quick recap of how tasks 1.1 through 1.7 fit together before moving to Domain 3? Just ask.</p>
+
+<div class="nav-links">
+  <a href="./0003-hooks-and-enforcement.html">← Lesson 3: Hooks</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0005-claude-md-hierarchy-and-rules.html">Lesson 5: CLAUDE.md Hierarchy →</a>
+</div>

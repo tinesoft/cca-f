@@ -1,0 +1,83 @@
+<title>Lesson 5: CLAUDE.md Hierarchy &amp; Path-Scoped Rules</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 5 · Domain 3 — Claude Code Configuration &amp; Workflows (20% of exam)</p>
+<h1>CLAUDE.md Hierarchy &amp; Path-Scoped Rules</h1>
+<p>New domain. Domain 3 is about configuring Claude Code itself for real team workflows — and the first thing to get straight is where instructions live, because "Claude isn't following our conventions" is almost always a hierarchy problem, not a prompting problem.</p>
+
+<h2>Three levels, one clear rule about sharing</h2>
+<ul>
+  <li><strong>User-level</strong> — <code>~/.claude/CLAUDE.md</code>. Personal to you. <strong>Not shared with teammates</strong>, no matter how the project is configured.</li>
+  <li><strong>Project-level</strong> — <code>.claude/CLAUDE.md</code> or a root <code>CLAUDE.md</code>. Shared via version control — this is what the whole team gets.</li>
+  <li><strong>Directory-level</strong> — a <code>CLAUDE.md</code> inside a specific subdirectory, scoped to work happening there.</li>
+</ul>
+<p>This single fact resolves a whole category of "why isn't this working" questions: if a new teammate clones the repo and Claude doesn't follow team conventions for them, the conventions almost certainly live in someone's personal <code>~/.claude/CLAUDE.md</code> instead of the project-level file. Run <code>/memory</code> to see exactly which memory files are actually loaded for a session — it's the fastest way to diagnose this.</p>
+
+<h2>@import for modular configuration</h2>
+<pre><code>&lt;!-- .claude/CLAUDE.md --&gt;
+# Project conventions
+@import ./docs/api-conventions.md
+@import ./docs/testing-standards.md</code></pre>
+<p><code>@import</code> keeps a single monolithic CLAUDE.md from becoming unmanageable — reference external files instead of inlining everything, and let each package maintainer own their own imported slice.</p>
+
+<h2>.claude/rules/: scoping by file pattern, not by folder</h2>
+<p>Directory-level CLAUDE.md scopes by <em>where a file lives</em>. That breaks down the moment a convention needs to apply to files scattered across the tree regardless of location — the textbook case being test files sitting right next to the code they test (<code>Button.test.tsx</code> beside <code>Button.tsx</code>), everywhere in the codebase.</p>
+<pre><code>---
+paths:
+  - "**/*.test.tsx"
+  - "**/*.test.ts"
+---
+Tests use Vitest + Testing Library. Mock network calls with msw, never fetch directly.</code></pre>
+<p>A rule file in <code>.claude/rules/</code> with a <code>paths</code> glob in its YAML frontmatter loads <em>only</em> when Claude is editing a matching file — regardless of which directory that file happens to be in. That's strictly better than either a bloated root CLAUDE.md (loaded always, for every file) or dozens of per-directory CLAUDE.md files (which can't express "any file matching this pattern, anywhere").</p>
+
+<div class="callout accent">
+  <div class="callout-title">Match the tool to the shape of the convention</div>
+  If a convention is scoped by <em>location</em> (everything under <code>terraform/</code>), directory-level CLAUDE.md or a rule with a directory glob both work. If it's scoped by <em>file type or pattern</em> that cuts across the whole tree, only a glob-based rule in <code>.claude/rules/</code> actually holds up. Relying on Claude to infer which section of one giant CLAUDE.md applies is not a reliable substitute for either.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://code.claude.com/docs" target="_blank" rel="noopener">Extend Claude Code</a> documentation covers CLAUDE.md, imports, and memory files directly — this lesson compresses Task Statements 3.1 and 3.3 from the official exam guide.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. Test files sit throughout the codebase next to the code they test, and you want the same conventions applied automatically no matter where a test file lives. What's the most maintainable fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">A .claude/rules/ file with a glob like **/*.test.tsx</button>
+    <button class="quiz-option">One root CLAUDE.md section covering every test type</button>
+    <button class="quiz-option">A skill per code type that developers invoke manually</button>
+    <button class="quiz-option">A separate CLAUDE.md placed in each test's subdirectory</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a glob-scoped rule applies by file pattern regardless of directory, which is exactly the shape this convention needs." data-incorrect-text="This convention is scoped by file type, not location — only a glob pattern in .claude/rules/ can express 'anywhere this pattern matches,' automatically."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A new teammate clones the repo, but Claude doesn't seem to follow the team's conventions for them. What's the most likely cause?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">The conventions live in someone's personal user-level CLAUDE.md</button>
+    <button class="quiz-option">The teammate needs to run /memory before anything loads</button>
+    <button class="quiz-option">@import syntax only activates after the first commit</button>
+    <button class="quiz-option">.claude/rules/ requires a paid team plan to function</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — user-level CLAUDE.md is personal by design and never travels with the repo. If it's not in the project-level file, new teammates simply never see it." data-incorrect-text="The hierarchy is the usual culprit here: anything in ~/.claude/CLAUDE.md stays with its owner. It needs to be in the project-level file to reach the whole team."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. What does @import let you do inside CLAUDE.md?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Reference external files to keep configuration modular</button>
+    <button class="quiz-option">Grant a skill access to additional restricted tools</button>
+    <button class="quiz-option">Force plan mode for every session in a directory</button>
+    <button class="quiz-option">Share personal ~/.claude preferences with the whole team</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — @import is purely about composing CLAUDE.md out of smaller, separately-owned files instead of one growing monolith." data-incorrect-text="@import is a modularity mechanism for CLAUDE.md content specifically — tool access, plan mode, and personal-config sharing are handled elsewhere."></div>
+</div>
+
+<p class="ask-agent">Want to see how .claude/rules/ frontmatter compares to skill frontmatter, which is coming up next? Just ask.</p>
+
+<div class="nav-links">
+  <a href="./0004-task-decomposition-and-sessions.html">← Lesson 4: Task Decomposition</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0006-commands-vs-skills.html">Lesson 6: Commands vs. Skills →</a>
+</div>

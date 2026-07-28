@@ -1,0 +1,88 @@
+<title>Lesson 10: Explicit Criteria &amp; Few-Shot Prompting</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 10 · Domain 4 — Prompt Engineering &amp; Structured Output (20% of exam)</p>
+<h1>Explicit Criteria &amp; Few-Shot Prompting</h1>
+<p>New domain. Domain 4 is about getting reliable, precise output from Claude — starting with the most common failure mode: instructions that sound reasonable but don't actually constrain behavior.</p>
+
+<h2>Vague instructions don't reduce false positives</h2>
+<p>"Be conservative." "Only report high-confidence findings." These sound like precision controls. They aren't — a model has no stable, calibrated internal notion of "conservative" to dial up or down. What actually works is <strong>explicit, categorical criteria</strong>: not "check that comments are accurate," but "flag a comment only when the claimed behavior contradicts the code's actual behavior." One is a vibe. The other is a test the model can apply consistently.</p>
+<p>This matters more than it sounds like it should, because false positives are contagious to trust: once a reviewer catches a category producing noise, they start discounting <em>every</em> category's findings, including the accurate ones. If one category is the clear offender, the proportionate response is to disable that specific category temporarily while you sharpen its criteria — not to loosen the whole system's confidence threshold, and not to ignore it either.</p>
+
+<h2>Few-shot: for consistency, and for judgment</h2>
+<p>Detailed prose instructions alone often produce inconsistent formatting or inconsistent handling of edge cases. Few-shot examples fix both — but their real value is the second one: 2–4 well-chosen examples showing <em>reasoning</em> for ambiguous cases teach the model to generalize that judgment to genuinely novel situations, not just to match the examples verbatim.</p>
+
+<pre><code>const fewShotExamples = [
+  {
+    role: "user" as const,
+    content: "Comment: 'Cache TTL is 5 minutes.' Code: TTL = 300 // seconds",
+  },
+  {
+    role: "assistant" as const,
+    content: "No issue — 300 seconds equals 5 minutes; the comment is accurate.",
+  },
+  {
+    role: "user" as const,
+    content: "Comment: 'Cache TTL is 5 minutes.' Code: TTL = 30 // seconds",
+  },
+  {
+    role: "assistant" as const,
+    content: "Issue: the comment claims 5 minutes, but the code sets 30 seconds.",
+  },
+];
+
+const messages = [...fewShotExamples, { role: "user" as const, content: newComment }];</code></pre>
+
+<p>The same technique is what makes structured extraction more reliable on messy real-world documents — showing correct handling of varied structures (inline citations vs. a bibliography, informal measurements vs. precise ones) reduces hallucination when the model hits a document shape it hasn't seen described in words.</p>
+
+<div class="callout accent">
+  <div class="callout-title">The pattern to recognize</div>
+  Whenever a question presents "false positives are hurting trust" or "output is inconsistent" as the problem, and one answer option just intensifies a vague instruction ("be even more careful," "increase the confidence bar"), that's the trap. The fix that actually works replaces vagueness with something concrete — explicit criteria, or examples that demonstrate the judgment directly.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://platform.claude.com/docs" target="_blank" rel="noopener">Claude API docs</a> cover prompt engineering technique directly, including few-shot design — this lesson compresses Task Statements 4.1 and 4.2.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. A code review prompt says "only flag high-confidence issues," but false positives stay high. What's the more effective instruction?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Explicit criteria defining exactly what counts as an issue</button>
+    <button class="quiz-option">A stronger restatement to "be even more conservative"</button>
+    <button class="quiz-option">A larger self-reported confidence threshold before flagging</button>
+    <button class="quiz-option">Extended thinking so the model reasons longer per comment</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — vague conservatism instructions don't reliably constrain behavior. A concrete, testable criterion does." data-incorrect-text="These all sound like precision controls, but none give the model a concrete test to apply. Explicit categorical criteria are what actually change the outcome."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. One review category produces most of the false positives, damaging trust in every category's findings. What's the proportionate fix?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Temporarily disable that category while refining its criteria</button>
+    <button class="quiz-option">Disable all review categories until confidence improves globally</button>
+    <button class="quiz-option">Ignore it — false positives are an unavoidable cost</button>
+    <button class="quiz-option">Switch the whole task to a different model immediately</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — isolate and fix the specific offending category rather than degrading the whole system or leaving a known problem unaddressed." data-incorrect-text="The problem is localized to one category — a global shutdown or a model swap overcorrects, and ignoring it lets the trust damage compound."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Why do few-shot examples help with genuinely novel, unseen cases — not just cases matching the examples exactly?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">They demonstrate the reasoning pattern, which the model generalizes</button>
+    <button class="quiz-option">They guarantee the model memorizes each example verbatim</button>
+    <button class="quiz-option">They replace the need for any system prompt instructions</button>
+    <button class="quiz-option">They only work when the novel case is identical to one shown</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — good few-shot examples show the reasoning behind a judgment call, and that reasoning transfers to cases the examples never covered directly." data-incorrect-text="The value isn't memorization or exact matching — it's that a well-chosen example demonstrates a judgment pattern the model can apply to something it hasn't seen before."></div>
+</div>
+
+<p class="ask-agent">Want help turning a vague instruction you're currently using into explicit, testable criteria? Share it and we'll rework it together.</p>
+
+<div class="nav-links">
+  <a href="./0009-tool-distribution-and-mcp-scoping.html">← Lesson 9: Scoping Tools</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0011-structured-output-and-validation.html">Lesson 11: Structured Output &amp; Validation →</a>
+</div>

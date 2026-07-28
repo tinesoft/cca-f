@@ -20,5 +20,10 @@ Allocation roughly follows exam weighting so time-on-task matches point-value. E
 
 Reference doc: [reference/study-plan.html](./reference/study-plan.html) has this as a printable checklist.
 
+## Curriculum status
+All 14 lessons (Weeks 1-3, Domains 1-5, task statements 1.1-5.6) were authored 2026-07-27 and are ready in `lessons/`. Week 4 material was added 2026-07-28: `reference/preparation-exercises.html` (all 4 official hands-on exercises, linked to prerequisite lessons) and `reference/scenario-drills.html` (18 new mixed-domain practice questions across the 6 official scenarios, workspace-authored and grounded in the guide's task statements — not verbatim official content, since the official practice exam link hasn't been located yet, see RESOURCES.md gap note). `exam-blueprint.html` now also carries the official guide's Appendix checklist and 8 prep recommendations.
+
+The study-plan.html checkboxes track the user's own study progress, not authoring status — leave unchecked until actually worked through. Still open: locating the official practice exam (RESOURCES.md gap), and populating reference/glossary.html (only once quizzes demonstrate understanding, per the teach skill's rule — not yet triggered). The full curriculum build is otherwise complete.
+
 ## Teaching preferences observed
 - Code samples should use TypeScript, not Python, whenever showing Anthropic docs/SDK code (stated 2026-07-27). Applies to all future lessons — the Agent SDK and API docs show both languages, always pick the TS version.

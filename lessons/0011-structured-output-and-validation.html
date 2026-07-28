@@ -1,0 +1,95 @@
+<title>Lesson 11: Structured Output &amp; Validation Loops</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+
+<p class="kicker">Lesson 11 · Domain 4 — Prompt Engineering &amp; Structured Output (20% of exam)</p>
+<h1>Structured Output &amp; Validation Loops</h1>
+<p>Explicit criteria and few-shot examples shape <em>what</em> Claude decides. This lesson is about guaranteeing the <em>shape</em> of what comes back — and knowing exactly where that guarantee stops.</p>
+
+<h2>tool_use + JSON schema: what it actually guarantees</h2>
+<p>Defining an extraction tool with an <code>input_schema</code> and reading the result out of the <code>tool_use</code> block is the reliable way to get schema-compliant structured output. It eliminates an entire class of failure — malformed JSON, missing quotes, trailing commas — that used to require regex cleanup on free-text output.</p>
+<p><strong>It does not eliminate semantic errors.</strong> Line items that don't sum to the stated total, a value landing in the wrong field, a category that's technically valid JSON but factually wrong — none of that is caught by schema validation. The schema checks shape, not truth.</p>
+
+<pre><code>const invoiceSchema = {
+  name: "extract_invoice",
+  input_schema: {
+    type: "object",
+    properties: {
+      total: { type: "number" },
+      lineItems: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            description: { type: "string" },
+            amount: { type: "number" },
+          },
+        },
+      },
+      vendorTaxId: { type: ["string", "null"] }, // nullable — don't fabricate
+      category: {
+        type: "string",
+        enum: ["utilities", "supplies", "travel", "other"],
+      },
+    },
+    required: ["total", "lineItems", "category"],
+  },
+};</code></pre>
+
+<p>Two schema-design habits worth internalizing: make a field <strong>nullable/optional</strong> rather than required when the source document genuinely might not contain that information — a required field the model can't fill honestly gets fabricated to satisfy the schema instead. And give enum fields an <code>"other"</code> escape valve (paired with a free-text detail field) plus an <code>"unclear"</code> value for genuinely ambiguous cases, so the model isn't forced into a wrong bucket just because none of the fixed options fit.</p>
+
+<h2>Validation-retry: works for format, not for absence</h2>
+<p>When a semantic validation error is caught downstream (totals don't reconcile, a required relationship is violated), appending the specific error back into a follow-up request — original document, the failed extraction, and the exact validation error — reliably guides the model to self-correct. This is <strong>retry-with-error-feedback</strong>.</p>
+<p>It has one hard limit: retrying cannot produce information that was never in the source document to begin with. If a required field is simply absent from what you gave the model, no amount of retrying fixes that — the fix there is making the field nullable, not looping harder.</p>
+<p>A useful diagnostic habit: have extractions include a <code>detected_pattern</code> field describing what in the text triggered a given finding. When developers start dismissing findings, this field lets you analyze <em>why</em> systematically instead of guessing.</p>
+
+<div class="callout accent">
+  <div class="callout-title">Two failure modes, two different fixes</div>
+  <strong>Structural/format error</strong> (bad JSON, wrong type) → tool_use + schema prevents it outright. <strong>Semantic error</strong> (values don't reconcile, wrong field) → retry-with-error-feedback can catch and correct it. <strong>Missing information</strong> (the fact isn't in the source at all) → neither fixes this; the schema needs to allow "I don't know" instead of forcing an answer.
+</div>
+
+<h2>Why this matters beyond the exam</h2>
+<p><strong>Primary source:</strong> Anthropic's <a href="https://platform.claude.com/docs" target="_blank" rel="noopener">Claude API docs</a> cover tool use and JSON schema enforcement directly — this lesson compresses Task Statements 4.3 and 4.4.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q1. You enforce output with tool_use and a strict JSON schema. Line items sometimes don't sum to the stated total. What does this tell you?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">JSON schemas prevent syntax errors, not semantic ones</button>
+    <button class="quiz-option">The schema itself must be misconfigured somewhere</button>
+    <button class="quiz-option">tool_choice was left on "auto" instead of forced</button>
+    <button class="quiz-option">The model ignored the schema's required fields entirely</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — the schema guarantees the shape of the output, not the internal consistency of the values inside it. That's a separate validation problem." data-incorrect-text="A well-formed schema can still contain values that don't add up — schemas validate structure, not arithmetic or factual correctness. That gap needs a separate check."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q2. A required schema field can't be found anywhere in a given source document. What's the safest schema design?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">Make that field nullable/optional instead of required</button>
+    <button class="quiz-option">Force the model to guess a plausible value</button>
+    <button class="quiz-option">Reject the whole document as unprocessable immediately</button>
+    <button class="quiz-option">Leave the field required and retry until it appears</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — a required field the model can't honestly fill gets fabricated instead. Making it nullable lets the model say 'not present' truthfully." data-incorrect-text="A required field that isn't in the source will get fabricated to satisfy the schema. Making it nullable is what lets the model report absence honestly."></div>
+</div>
+
+<div class="quiz" data-quiz data-correct="0">
+  <div class="quiz-question">Q3. Retry-with-error-feedback fixes a validation failure. When does this approach NOT work?</div>
+  <div class="quiz-options">
+    <button class="quiz-option">When the needed information is absent from the source</button>
+    <button class="quiz-option">When the original output had a JSON syntax error</button>
+    <button class="quiz-option">When a required field was left out by mistake</button>
+    <button class="quiz-option">When two fields were swapped due to a format slip</button>
+  </div>
+  <div class="quiz-feedback" data-correct-text="Right — retrying can guide the model toward a value that exists but was misplaced or malformed. It cannot invent a fact that was never in the source." data-incorrect-text="Retry-with-error-feedback works well for structural and placement mistakes. It fails specifically when the answer simply isn't present anywhere to find."></div>
+</div>
+
+<p class="ask-agent">Want to design a schema for a real extraction task you have in mind? Describe the source documents and I'll help you think through required vs. nullable fields.</p>
+
+<div class="nav-links">
+  <a href="./0010-explicit-criteria-and-few-shot.html">← Lesson 10: Explicit Criteria &amp; Few-Shot</a>
+  <a href="../reference/study-plan.html">Study Plan</a>
+  <a href="./0012-batches-and-multi-pass-review.html">Lesson 12: Batches &amp; Multi-Pass Review →</a>
+</div>
