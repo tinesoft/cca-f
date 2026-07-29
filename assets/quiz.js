@@ -2,17 +2,35 @@
 // Usage: <div class="quiz" data-quiz data-correct="1">
 //          <div class="quiz-question">...</div>
 //          <div class="quiz-options">
-//            <button class="quiz-option">...</button>  (index 0)
-//            <button class="quiz-option">...</button>  (index 1, correct)
+//            <button class="quiz-option">...</button>  (index 0, in source order)
+//            <button class="quiz-option">...</button>  (index 1, correct, in source order)
 //          </div>
 //          <div class="quiz-feedback" data-correct-text="..." data-incorrect-text="..."></div>
 //        </div>
+// data-correct indexes the options as authored in the HTML source; at
+// render time options are shuffled into a random on-screen order so the
+// correct answer isn't always in the same position.
 // Call initQuizzes() once after DOMContentLoaded.
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
 function initQuizzes() {
   document.querySelectorAll("[data-quiz]").forEach((quiz) => {
-    const correctIndex = parseInt(quiz.dataset.correct, 10);
-    const options = Array.from(quiz.querySelectorAll(".quiz-option"));
+    const originalIndex = parseInt(quiz.dataset.correct, 10);
+    const optionsContainer = quiz.querySelector(".quiz-options");
+    const originalOptions = Array.from(quiz.querySelectorAll(".quiz-option"));
+    const correctButton = originalOptions[originalIndex];
+
+    const options = shuffle(originalOptions.slice());
+    options.forEach((btn) => optionsContainer.appendChild(btn));
+    const correctIndex = options.indexOf(correctButton);
+
     const feedback = quiz.querySelector(".quiz-feedback");
 
     options.forEach((btn, i) => {
