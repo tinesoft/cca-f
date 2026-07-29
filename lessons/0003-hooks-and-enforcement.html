@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 3 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
 <h1>Hooks: Guaranteed Compliance vs. Probabilistic Guidance</h1>
@@ -97,6 +98,16 @@ function preToolUse(call: ToolCallEvent): ToolCallEvent | Blocked {
 </div>
 
 <p class="ask-agent">Curious how hook-based interception compares to the MCP-side structured error responses coming up in Domain 2? Ask any time.</p>
+
+<div data-coverage data-topic="Hooks: Guaranteed Compliance vs. Probabilistic Guidance" data-task="1.4–1.5" hidden>
+  <div data-subtopic data-name="Programmatic prerequisite gates" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="true"></div>
+  <div data-subtopic data-name="PostToolUse result interception" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="true"></div>
+  <div data-subtopic data-name="Pre-tool-use call interception &amp; blocking" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="true"></div>
+  <div data-subtopic data-name="SessionStart / SessionEnd hooks" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="false"></div>
+  <div data-subtopic data-name="Notification hooks" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="false"></div>
+  <div data-subtopic data-name="Hook timeout &amp; error-handling configuration" data-href="https://docs.claude.com/en/docs/claude-code/hooks" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0002-coordinator-subagent-orchestration.html">← Lesson 2: Coordinator/Subagent Orchestration</a>

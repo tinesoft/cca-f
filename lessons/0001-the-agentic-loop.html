@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 1 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
 <h1>The Agentic Loop</h1>
@@ -91,6 +92,17 @@
 </div>
 
 <p class="ask-agent">Stuck on any of this, or want to see how this loop maps onto the Agent SDK's own TypeScript types? Just ask — I'm your teacher for this workspace, not just the lesson author.</p>
+
+<div data-coverage data-topic="The Agentic Loop" data-task="1.1" hidden>
+  <div data-subtopic data-name="stop_reason handling (tool_use vs end_turn)" data-href="https://docs.claude.com/en/api/messages" data-in-scope="true"></div>
+  <div data-subtopic data-name="Tool result accumulation in conversation history" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Avoiding iteration-cap / text-parsing anti-patterns" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Streaming responses inside the loop" data-href="https://docs.claude.com/en/docs/build-with-claude/streaming" data-in-scope="false"></div>
+  <div data-subtopic data-name="Extended thinking / interleaved thinking blocks" data-href="https://docs.claude.com/en/docs/build-with-claude/extended-thinking" data-in-scope="false"></div>
+  <div data-subtopic data-name="Prompt caching within the loop" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" data-in-scope="false"></div>
+  <div data-subtopic data-name="Computer-use action loops" data-href="https://docs.claude.com/en/docs/agents-and-tools/computer-use" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="../reference/exam-blueprint.html">← Exam Blueprint</a>

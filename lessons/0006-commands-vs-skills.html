@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 6 · Domain 3 — Claude Code Configuration &amp; Workflows (20% of exam)</p>
 <h1>Slash Commands vs. Skills</h1>
@@ -79,6 +80,16 @@ argument-hint: "[package-name]"
 </div>
 
 <p class="ask-agent">Want to sketch a skill's frontmatter for a workflow you actually use? Tell me what it should do and I'll help you configure it.</p>
+
+<div data-coverage data-topic="Slash Commands vs. Skills" data-task="3.2" hidden>
+  <div data-subtopic data-name=".claude/commands/ vs. ~/.claude/commands/ scoping" data-href="https://docs.claude.com/en/docs/claude-code/slash-commands" data-in-scope="true"></div>
+  <div data-subtopic data-name="Skill frontmatter: context: fork" data-href="https://docs.claude.com/en/docs/claude-code/skills" data-in-scope="true"></div>
+  <div data-subtopic data-name="Skill frontmatter: allowed-tools &amp; argument-hint" data-href="https://docs.claude.com/en/docs/claude-code/skills" data-in-scope="true"></div>
+  <div data-subtopic data-name="MCP prompts exposed as slash commands" data-href="https://modelcontextprotocol.io" data-in-scope="false"></div>
+  <div data-subtopic data-name="Skill marketplace/plugin distribution" data-href="https://docs.claude.com/en/docs/claude-code/plugins" data-in-scope="false"></div>
+  <div data-subtopic data-name="Command argument parsing edge cases" data-href="https://docs.claude.com/en/docs/claude-code/slash-commands" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0005-claude-md-hierarchy-and-rules.html">← Lesson 5: CLAUDE.md Hierarchy</a>

@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 11 · Domain 4 — Prompt Engineering &amp; Structured Output (20% of exam)</p>
 <h1>Structured Output &amp; Validation Loops</h1>
@@ -89,6 +90,16 @@
 </div>
 
 <p class="ask-agent">Want to design a schema for a real extraction task you have in mind? Describe the source documents and I'll help you think through required vs. nullable fields.</p>
+
+<div data-coverage data-topic="Structured Output &amp; Validation Loops" data-task="4.3–4.4" hidden>
+  <div data-subtopic data-name="tool_use + input_schema for structured output" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Nullable/optional fields vs. fabrication risk" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Retry-with-error-feedback and its limits" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Streaming partial JSON tool-input parsing" data-href="https://docs.claude.com/en/docs/build-with-claude/streaming" data-in-scope="false"></div>
+  <div data-subtopic data-name="Strict mode / constrained decoding for schemas" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="false"></div>
+  <div data-subtopic data-name="Pydantic/zod schema-generation tooling" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0010-explicit-criteria-and-few-shot.html">← Lesson 10: Explicit Criteria &amp; Few-Shot</a>

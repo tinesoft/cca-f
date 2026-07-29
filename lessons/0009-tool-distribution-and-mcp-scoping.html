@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 9 · Domain 2 — Tool Design &amp; MCP Integration (18% of exam)</p>
 <h1>Scoping Tools Across Agents &amp; Servers</h1>
@@ -83,6 +84,16 @@ const forcedNamed = await client.messages.create({
 </div>
 
 <p class="ask-agent">That's Domain 2 wrapped up alongside Domain 3. Ready to move into Domain 4, prompt engineering and structured output? Just say the word.</p>
+
+<div data-coverage data-topic="Scoping Tools Across Agents &amp; Servers" data-task="2.3–2.5" hidden>
+  <div data-subtopic data-name="Fewer tools per agent, scoped by role" data-href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="tool_choice: auto / any / forced" data-href="https://docs.claude.com/en/api/messages" data-in-scope="true"></div>
+  <div data-subtopic data-name=".mcp.json vs. ~/.claude.json server scoping" data-href="https://docs.claude.com/en/docs/claude-code/mcp" data-in-scope="true"></div>
+  <div data-subtopic data-name="Grep / Glob / Edit tool selection" data-href="https://docs.claude.com/en/docs/claude-code/common-workflows" data-in-scope="true"></div>
+  <div data-subtopic data-name="MCP prompts &amp; sampling primitives" data-href="https://modelcontextprotocol.io" data-in-scope="false"></div>
+  <div data-subtopic data-name="OAuth-based remote MCP server auth" data-href="https://docs.claude.com/en/docs/claude-code/mcp" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0008-tool-descriptions-and-mcp-errors.html">← Lesson 8: Tool Descriptions</a>

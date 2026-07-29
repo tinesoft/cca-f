@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 14 · Domain 5 — Context Management &amp; Reliability (15% of exam)</p>
 <h1>Error Propagation, Scratchpads &amp; Provenance</h1>
@@ -88,6 +89,16 @@ function reportFailure(q: string): SubagentError {
 </div>
 
 <p class="ask-agent">That's every task statement in the official exam guide covered. Ready for a mixed-domain review, or want to talk through the mock-exam plan in Week 4? Just ask.</p>
+
+<div data-coverage data-topic="Error Propagation, Scratchpads &amp; Provenance" data-task="5.3–5.6" hidden>
+  <div data-subtopic data-name="Structured subagent error propagation" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Scratchpad files &amp; manifests for crash recovery" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Stratified sampling over aggregate accuracy" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Claim-to-source provenance preservation" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Distributed tracing / observability integrations" data-href="https://docs.claude.com/en/docs/claude-code/monitoring-usage" data-in-scope="false"></div>
+  <div data-subtopic data-name="Automatic retry/backoff policies" data-href="https://docs.claude.com/en/api/errors" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0013-context-preservation-and-escalation.html">← Lesson 13: Context &amp; Escalation</a>

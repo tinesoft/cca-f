@@ -27,6 +27,7 @@ The study-plan.html checkboxes track the user's own study progress, not authorin
 
 ## Site conventions
 - Static HTML, no build step, no shared layout — every page is a self-contained fragment. New pages must include `<script src="../assets/theme-toggle.js" defer></script>` (or `./assets/theme-toggle.js` for `index.html`) right after the stylesheet `<link>`, and after `assets/quiz.js` if the page has quizzes. This renders the manual light/dark/auto theme toggle (added 2026-07-29); since there's no shared header, the toggle only works on pages that include the script — copy an existing lesson's head block rather than writing a new page's head from scratch.
+- Lesson pages (only, not reference pages) also include `<script src="../assets/coverage.js" defer></script>` plus a `<div data-coverage data-topic="..." data-task="...">` block of `data-subtopic` entries (name/doc-link/in-scope flag), placed between the `ask-agent` paragraph and `nav-links` (added 2026-07-29). Renders a stat-card coverage bar + "related docs not on the exam" disclosure. Copy an existing lesson's block as the template for any new lesson; out-of-scope doc links are best-effort, not individually verified.
 
 ## Teaching preferences observed
 - Code samples should use TypeScript, not Python, whenever showing Anthropic docs/SDK code (stated 2026-07-27). Applies to all future lessons — the Agent SDK and API docs show both languages, always pick the TS version.

@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 2 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
 <h1>Coordinator/Subagent Orchestration</h1>
@@ -90,6 +91,17 @@ Return findings as an array of { claim: string; source: string; date: string }.`
 </div>
 
 <p class="ask-agent">Want to see how AgentDefinition tool restrictions compare to what you configured for the coordinator itself? Just ask.</p>
+
+<div data-coverage data-topic="Coordinator/Subagent Orchestration" data-task="1.2–1.3" hidden>
+  <div data-subtopic data-name="Hub-and-spoke coordination pattern" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Task tool &amp; allowedTools for spawning subagents" data-href="https://docs.claude.com/en/docs/claude-code/sub-agents" data-in-scope="true"></div>
+  <div data-subtopic data-name="Explicit context passing to isolated subagents" data-href="https://docs.claude.com/en/docs/claude-code/sub-agents" data-in-scope="true"></div>
+  <div data-subtopic data-name="Parallel Task calls in a single turn" data-href="https://docs.claude.com/en/docs/claude-code/sub-agents" data-in-scope="true"></div>
+  <div data-subtopic data-name="AgentDefinition tool-permission inheritance rules" data-href="https://docs.claude.com/en/docs/claude-code/sub-agents" data-in-scope="false"></div>
+  <div data-subtopic data-name="Background/async subagent execution" data-href="https://docs.claude.com/en/docs/claude-code/sub-agents" data-in-scope="false"></div>
+  <div data-subtopic data-name="Multi-turn conversations within one subagent invocation" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0001-the-agentic-loop.html">← Lesson 1: The Agentic Loop</a>

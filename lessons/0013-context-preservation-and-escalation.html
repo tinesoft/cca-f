@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 13 · Domain 5 — Context Management &amp; Reliability (15% of exam)</p>
 <h1>Preserving Context &amp; Calibrating Escalation</h1>
@@ -81,6 +82,16 @@ ${latestTurn}`;
 </div>
 
 <p class="ask-agent">Want to sketch escalation criteria for a system you're actually designing? Describe the domain and we'll draft the boundary together.</p>
+
+<div data-coverage data-topic="Preserving Context &amp; Calibrating Escalation" data-task="5.1–5.2" hidden>
+  <div data-subtopic data-name="Lost-in-the-middle &amp; persistent case-facts blocks" data-href="https://docs.claude.com/en/docs/build-with-claude/context-windows" data-in-scope="true"></div>
+  <div data-subtopic data-name="Trimming verbose tool output before it accumulates" data-href="https://docs.claude.com/en/docs/build-with-claude/context-windows" data-in-scope="true"></div>
+  <div data-subtopic data-name="Explicit escalation criteria (not confidence/sentiment)" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Per-model context window size limits" data-href="https://docs.claude.com/en/docs/about-claude/models/overview" data-in-scope="false"></div>
+  <div data-subtopic data-name="Prompt caching for repeated context blocks" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" data-in-scope="false"></div>
+  <div data-subtopic data-name="Automatic conversation summarization tooling" data-href="https://docs.claude.com/en/docs/claude-code/costs" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0012-batches-and-multi-pass-review.html">← Lesson 12: Batches &amp; Multi-Pass Review</a>

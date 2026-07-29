@@ -202,6 +202,48 @@ li { margin: 0.4rem 0; }
 .quiz-feedback.correct-text { color: var(--ok); }
 .quiz-feedback.incorrect-text { color: var(--bad); }
 
+/* Exam coverage widget — bottom of each lesson, shows how much of a topic's
+   documented breadth (per official docs) the exam actually tests. */
+.coverage-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 0.4rem 0 0.8rem;
+}
+.coverage-figure {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--accent);
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.coverage-figure span { font-size: 1.1rem; font-weight: 600; }
+.coverage-body { flex: 1; }
+.coverage-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.coverage-bar-fill { height: 100%; background: var(--accent); }
+.coverage-body p { margin: 0; font-size: 0.88rem; }
+.coverage-details {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.7rem;
+}
+.coverage-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+}
+.coverage-details ul { margin: 0.6rem 0 0; padding-left: 1.2rem; }
+.coverage-details li { margin: 0.3rem 0; }
+
 .nav-links {
   margin-top: 3rem;
   padding-top: 1.2rem;

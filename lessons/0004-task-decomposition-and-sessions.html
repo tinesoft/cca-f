@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 4 · Domain 1 — Agentic Architecture &amp; Orchestration (27% of exam)</p>
 <h1>Task Decomposition &amp; Session Lifecycle</h1>
@@ -72,6 +73,16 @@ claude --resume codebase-baseline --fork-session testing-strategy-b</code></pre>
 </div>
 
 <p class="ask-agent">That's all of Domain 1. Want a quick recap of how tasks 1.1 through 1.7 fit together before moving to Domain 3? Just ask.</p>
+
+<div data-coverage data-topic="Task Decomposition &amp; Session Lifecycle" data-task="1.6–1.7" hidden>
+  <div data-subtopic data-name="Prompt chaining vs. dynamic decomposition" data-href="https://docs.claude.com/en/api/agent-sdk/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="--resume for continuing a named session" data-href="https://docs.claude.com/en/docs/claude-code/cli-reference" data-in-scope="true"></div>
+  <div data-subtopic data-name="fork_session for branching from a baseline" data-href="https://docs.claude.com/en/docs/claude-code/cli-reference" data-in-scope="true"></div>
+  <div data-subtopic data-name="Session storage location &amp; retention limits" data-href="https://docs.claude.com/en/docs/claude-code/common-workflows" data-in-scope="false"></div>
+  <div data-subtopic data-name="--continue vs. --resume flag differences" data-href="https://docs.claude.com/en/docs/claude-code/cli-reference" data-in-scope="false"></div>
+  <div data-subtopic data-name="Transcript export formats" data-href="https://docs.claude.com/en/docs/claude-code/common-workflows" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0003-hooks-and-enforcement.html">← Lesson 3: Hooks</a>

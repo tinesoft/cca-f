@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/quiz.js" defer></script>
 <script src="../assets/theme-toggle.js" defer></script>
+<script src="../assets/coverage.js" defer></script>
 
 <p class="kicker">Lesson 10 · Domain 4 — Prompt Engineering &amp; Structured Output (20% of exam)</p>
 <h1>Explicit Criteria &amp; Few-Shot Prompting</h1>
@@ -82,6 +83,16 @@ const messages = [...fewShotExamples, { role: "user" as const, content: newComme
 </div>
 
 <p class="ask-agent">Want help turning a vague instruction you're currently using into explicit, testable criteria? Share it and we'll rework it together.</p>
+
+<div data-coverage data-topic="Explicit Criteria &amp; Few-Shot Prompting" data-task="4.1–4.2" hidden>
+  <div data-subtopic data-name="Explicit categorical criteria vs. vague instructions" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" data-in-scope="true"></div>
+  <div data-subtopic data-name="Few-shot examples for format consistency" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/few-shot-examples" data-in-scope="true"></div>
+  <div data-subtopic data-name="Few-shot examples for generalizing judgment" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/few-shot-examples" data-in-scope="true"></div>
+  <div data-subtopic data-name="Chain-of-thought / extended thinking prompting" data-href="https://docs.claude.com/en/docs/build-with-claude/extended-thinking" data-in-scope="false"></div>
+  <div data-subtopic data-name="System prompt vs. user-turn example placement" data-href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/system-prompts" data-in-scope="false"></div>
+  <div data-subtopic data-name="Prompt templates &amp; variables in the API" data-href="https://console.claude.com/dashboard" data-in-scope="false"></div>
+</div>
+<div id="coverage-mount"></div>
 
 <div class="nav-links">
   <a href="./0009-tool-distribution-and-mcp-scoping.html">← Lesson 9: Scoping Tools</a>
