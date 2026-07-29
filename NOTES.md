@@ -25,5 +25,8 @@ All 14 lessons (Weeks 1-3, Domains 1-5, task statements 1.1-5.6) were authored 2
 
 The study-plan.html checkboxes track the user's own study progress, not authoring status — leave unchecked until actually worked through. Still open: locating the official practice exam (RESOURCES.md gap), and populating reference/glossary.html (only once quizzes demonstrate understanding, per the teach skill's rule — not yet triggered). The full curriculum build is otherwise complete.
 
+## Site conventions
+- Static HTML, no build step, no shared layout — every page is a self-contained fragment. New pages must include `<script src="../assets/theme-toggle.js" defer></script>` (or `./assets/theme-toggle.js` for `index.html`) right after the stylesheet `<link>`, and after `assets/quiz.js` if the page has quizzes. This renders the manual light/dark/auto theme toggle (added 2026-07-29); since there's no shared header, the toggle only works on pages that include the script — copy an existing lesson's head block rather than writing a new page's head from scratch.
+
 ## Teaching preferences observed
 - Code samples should use TypeScript, not Python, whenever showing Anthropic docs/SDK code (stated 2026-07-27). Applies to all future lessons — the Agent SDK and API docs show both languages, always pick the TS version.
